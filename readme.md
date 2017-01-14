@@ -11,6 +11,7 @@ This is an experimental view library using a virtual DOM. Updates to the DOM and
 
 ## Coming Soon™
 
+- Decoupled DOM,
 - Store immutability,
 - Template middleware,
 - A router,
