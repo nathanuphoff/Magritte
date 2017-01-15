@@ -21,7 +21,21 @@ var view = (function(document, undefined) {
 
     if (vDOM.length) {
       while (++index < length) {
-        vDOM[index] = updateComponent($root, childNodes[index], components[index], vDOM[index], state)
+        
+        const $component = childNodes[index]      
+        let component = components[index]
+        
+        while (typeof component === typeFunction) component = component(state)
+        
+        if (component instanceof _Array) {
+          vDOM[index] = updateElement($root, $component, component, vDOM[index], state)
+        }
+        else if (contentPattern.test(componentType)) {
+          vDOM[index] = updateContent($root, $component, component, vDOM[index], state)
+        }
+        else vDOM[index] = null
+                
+        
       }
       while (childNodes.length > index) {
         $root.removeChild(childNodes[index])
@@ -41,10 +55,8 @@ var view = (function(document, undefined) {
 
     while (++index < length) {
 
-      var component = components[index]
-      var componentType = typeof component
-
-      if (componentType === typeFunction) component = component(state)
+      let component = components[index]
+      while (typeof component === typeFunction) component = component(state)
 
       if (component instanceof _Array) {
         vDOM[index] = renderElement($root, component, state)
@@ -59,24 +71,8 @@ var view = (function(document, undefined) {
 
   }
 
-  function updateComponent($root, $component, component, vDOM, state) {
-
-    var componentType = typeof component
-    if (componentType === typeFunction) component = component(state)
-
-    if (component instanceof _Array) {
-      vDOM = updateElement($root, $component, component, vDOM, state)
-    }
-    else if (contentPattern.test(componentType)) {
-      vDOM = updateContent($root, $component, component, vDOM, state)
-    }
-
-    return vDOM
-
-  }
-
   // element
-  var elementCache = {}
+  var elementCache = {} // done
   function createElement(tagName) {
   
     if (elementCache[tagName]) return elementCache[tagName].cloneNode(false) 
@@ -146,7 +142,7 @@ var view = (function(document, undefined) {
           var $child = childNodes[childIndex]
           var contentType = typeof content
 
-          if (contentType === typeFunction) content = content(state)
+          while (typeof content === typeFunction) content = content(state)
 
           if (contentPattern.test(contentType)) {
             if (content !== vContent) renderContent($element, content, $child)

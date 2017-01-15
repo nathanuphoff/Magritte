@@ -1,0 +1,34 @@
+{
+  "name": "micro",
+  "version": "0.0.1",
+  "description": "A collection of functional general purpose browser methods.",
+  "main": "source/index.js",
+  "scripts": {
+    "build": "rollup -c --watch",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "keywords": [
+    "ES6",
+    "Modular",
+    "FP",
+    "Functional",
+    "DOM",
+    "browser"
+  ],
+  "author": "Nathan Uphoff",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-preset-es2015-rollup": "^1.2.0",
+    "rollup": "^0.36.3",
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-livereload": "^0.1.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-serve": "^0.1.0",
+    "rollup-plugin-uglify": "^1.0.1",
+    "rollup-watch": "^2.5.0"
+  }
+}
