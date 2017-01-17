@@ -1,4 +1,36 @@
+const map = callback => data => data.map(callback)
+const reduce = (callback, value) => data => data.reduce(callback, value)
+
 var view = (function(document, undefined) {
+
+  const _render = methods => value => {
+    return methods[value == null ? 'void' : value.constructor === Array ? 'array' : typeof value]
+  }
+
+  const update = _render({
+    array: console.log,
+    void: console.log,
+    string: console.log,
+    number: console.log,
+    object: console.log,
+    boolean: console.log,
+  })
+  
+  const setAttributeContent = (node, key, content) => node[key] = content
+
+  const setAttribute = _render({
+    function: setAttributeContent,
+    array: (node, key, content) => {
+      const value = content.map(value => contentPattern.test(typeof value) ? value : '').join(' ').trim()
+      return value.length ? node[key] = value : null
+    },
+    void: _ => undefined,
+    string: setAttributeContent,
+    number: setAttributeContent,
+    boolean: (node, key, content) => (node[key] = content ? content : false, content),
+  })
+
+
 
   var svgPattern = /circle|clipPath|defs|ellipse|g|image|line|linearGradient|mask|path|pattern|polygon|polyline|radialGradient|rect|stop|svg|symbol|text|tspan/i
   var svgNameSpace = 'http://www.w3.org/2000/svg'
@@ -12,16 +44,17 @@ var view = (function(document, undefined) {
   function spread(value) { return [].slice.call(value) }
 
   // component
-  function updateComponents($root, components, vDOM, state) {
+  function updateComponents(root, components, vDOM = [], state) {
   
-    var vDOM = vDOM || []
-    var childNodes = $root.childNodes
+    var childNodes = root.childNodes
     var length = components.length
     var index = -1
 
     if (vDOM.length) {
+
       while (++index < length) {
         
+<<<<<<< Updated upstream
         const $component = childNodes[index]      
         let component = components[index]
         
@@ -36,18 +69,42 @@ var view = (function(document, undefined) {
         else vDOM[index] = null
                 
         
+=======
+        var component = components[index]
+        var node = childNodes[index]
+        var vContent = vDOM[index]
+
+        var type = typeof component
+        while (type === typeFunction) {
+          component = component(state)
+          type = typeof component
+        }
+
+        if (component == null) {
+          vDOM[index] = component
+        }
+        else if (component instanceof _Array) {
+          vDOM[index] = updateElement(root, node, component, vContent, state)
+        }
+        else if (contentPattern.test(type)) {
+          vDOM[index] = updateContent(root, node, component, vContent, state)
+        }
+
+>>>>>>> Stashed changes
       }
+
       while (childNodes.length > index) {
-        $root.removeChild(childNodes[index])
+        root.removeChild(childNodes[index])
       }
+
     }
-    else vDOM = renderComponents($root, components, state)
+    else vDOM = renderComponents(root, components, state)
 
     return vDOM
 
   }
 
-  function renderComponents($root, components, state) {
+  function renderComponents(root, components, state) {
   
     var vDOM = []
     var length = components.length
@@ -55,15 +112,25 @@ var view = (function(document, undefined) {
 
     while (++index < length) {
 
+<<<<<<< Updated upstream
       let component = components[index]
       while (typeof component === typeFunction) component = component(state)
+=======
+      var component = components[index]
+      var type = typeof component
+      while (type === typeFunction) {
+        component = component(state)
+        type = typeof component
+      }
+>>>>>>> Stashed changes
 
       if (component instanceof _Array) {
-        vDOM[index] = renderElement($root, component, state)
+        vDOM[index] = renderElement(root, component, state)
       }
-      else if (contentPattern.test(componentType)) {
-        vDOM[index] = renderContent($root, component)
+      else if (contentPattern.test(type)) {
+        vDOM[index] = renderContent(root, component)
       }
+      else vDOM[index] = null
 
     }
 
@@ -72,6 +139,7 @@ var view = (function(document, undefined) {
   }
 
   // element
+<<<<<<< Updated upstream
   var elementCache = {} // done
   function createElement(tagName) {
   
@@ -84,38 +152,54 @@ var view = (function(document, undefined) {
       return $element.cloneNode(false)
     }
 
+=======
+  var elementCache = {}
+  function createElement(type) {
+    return (elementCache[type] = elementCache[type]
+      ? elementCache[type]
+      : svgPattern.test(type)
+        ? document.createElementNS(svgNameSpace, type)
+        : document.createElement(type)
+    ).cloneNode()
+>>>>>>> Stashed changes
   }
 
-  function renderElement($parent, element, state, $current) {
+  function renderElement(parent, template, state, $current) {
 
-    var tagName = element[0]
-    var $element = createElement(tagName)
-    var vElement = [ tagName ]
+    var type = template[0]
+    var $element = createElement(type)
+    var vElement = [type]
     
-    var length = element.length
+    var length = template.length
     var index = 0
 
     while (++index < length) {
 
-      var content = element[index]
-      var contentType = typeof content
+      var content = template[index]
+      var type = typeof content
 
-      if (contentType === typeFunction) content = content(state)
-
-      if (content instanceof _Array) {
-        vElement[index] = renderElement($element, content, state)
+      while (type === typeFunction) {
+        content = content(state)
+        type = typeof content
       }
-      else if (contentPattern.test(contentType)) {
+
+      if (content == null) {
+        vElement[index] = null
+      }
+      else if (contentPattern.test(type)) {
         vElement[index] = renderContent($element, content)
       }
-      else if (content && contentType === typeObject) {
+      else if (content instanceof _Array) {
+        vElement[index] = renderElement($element, content, state)
+      }
+      else if (type === typeObject) {
         vElement[index] = renderAttributes($element, content)
       }
 
     }
 
-    if ($current) $parent.replaceChild($element, $current)
-    else $parent.appendChild($element)
+    if ($current) parent.replaceChild($element, $current)
+    else parent.appendChild($element)
 
     return vElement
 
@@ -145,8 +229,7 @@ var view = (function(document, undefined) {
           while (typeof content === typeFunction) content = content(state)
 
           if (contentPattern.test(contentType)) {
-            if (content !== vContent) renderContent($element, content, $child)
-            vElement[index] = content
+            if (content !== vContent) vElement[index] = $child.nodeValue = content
             ++childIndex
           }
           else if (content instanceof _Array) {
@@ -197,123 +280,30 @@ var view = (function(document, undefined) {
   }
 
   // content
-  function renderContent($parent, content, $current) {
-    var $content = document.createTextNode(content)
-    if ($current) $parent.replaceChild($content, $current)
-    else $parent.appendChild($content)
+  function renderContent(parent, content) {
+    parent.appendChild(document.createTextNode(content))
     return content
   }
 
 
   // attribute
-  function renderAttributes($element, attributes) {
-
-    var vAttributes = {}
-    var isSVG = $element instanceof _SVGElement
-    var keys = Object.keys(attributes)
-    var length = keys.length
-    var index = -1
-
-    while (++index < length) {   
-
-      var key = keys[index]
-      var value = attributes[key]
-      var valueType = typeof value
-
-      if (valueType === typeFunction) $element[key] = value
-      else if (isSVG && key === 'xlink:href') {
-        var nameSpace = xlinkNameSpace
-        if (value instanceof _Array) {
-          value = renderAttributeValue(value)
-          $element.setAttributeNS(nameSpace, key, value)
-        }
-        else if (value === true) $element.setAttributeNS(nameSpace, key, '')
-        else if (contentPattern.test(valueType)) $element.setAttributeNS(nameSpace, key, value)
-      }
-      else if (key in $element) {
-        if (value instanceof _Array) value = renderAttributeValue(value)
-        $element[key] = value
-      }
-
-      vAttributes[key] = value
-
+  function renderAttributes(node, attributes) {
+    for (const key in attributes) {      
+      let value = attributes[key]
+      if (key === 'className' && value == null || value === false || value == true) value = ''
+      attributes[key] = setAttribute(value)(node, key, value)
     }
-
-    return vAttributes
-
+    return attributes
   }
 
-  function updateAttributes($element, attributes, oldAttributes) {
-
-    oldAttributes = oldAttributes || {}
-    var vAttributes = {}
-    var isSVG = $element instanceof _SVGElement
-    var keys = Object.keys(attributes)
-    var length = keys.length
-    var index = -1
-
-    while (++index < length) {
-
-      var key = keys[index]
-      var value = attributes[key]
-      var oldValue = oldAttributes[key]
-      
-      if (typeof value === typeFunction) $element[key] = value
-      else if (typeof oldValue === typeFunction) $element[key] = null
-      else if (isSVG) {
-        var nameSpace = key === 'xlink:href' ? 'http://www.w3.org/1999/xlink' : svgNameSpace
-        if (value instanceof _Array) {
-          value = renderAttributeValue(value)
-          $element.setAttributeNS(nameSpace, key, value)
-        }
-        if (value !== oldAttributes[key]) {
-          if (value === null || value === false || value === undefined) {
-            $element.removeAttributeNS(nameSpace, key)
-          }
-          else if (value === true) $element.setAttributeNS(nameSpace, key, '')
-          else $element.setAttributeNS(nameSpace, key, value)
-        }
-      }
-      else if (key in $element) {
-        if (value instanceof _Array) value = renderAttributeValue(value)
-        if (value !== oldAttributes[key]) $element[key] = value
-      }
-      
-      vAttributes[key] = value
-
+  function updateAttributes(node, content, abstract) {
+    for (const key in content) {
+      let value = content[key]
+      if (key === 'className' && value == null || value === false || value == true) value = ''
+      if (value !== abstract[key]) abstract[key] = setAttribute(value)(node, key, value)
     }
-
-    return vAttributes
-
+    return abstract
   }
-
-  function renderAttributeValue(array) {
-
-    var result = []
-    var length = array.length
-    var index = -1
-
-    while (++index < length) {
-      var value = array[index]
-      result[index] = contentPattern.test(typeof value) ? value : ''
-    }
-
-    return result.join(' ')
-
-  }
-
-  function compose() {
-    const template = spread(arguments)
-
-    return function() {
-      return template.concat(spread(arguments))
-    }
-  }
-
-  // methods
-  Object.assign(constructor, {    
-    compose: compose,
-  })
 
   // prototype
   var vDOM = {}
@@ -337,9 +327,9 @@ var view = (function(document, undefined) {
 
           return function(action) {
             var update = typeof action === typeFunction ? action(state[key]) : action
-            if (update !== undefined) {
-              Object.assign(state[key], update)
-              render(view, state)
+            if (update != null) {
+              state = Object.assign({}, state, { [key]: update })
+              render(null, view, Object.freeze(state))
             }
           }
 
@@ -348,7 +338,7 @@ var view = (function(document, undefined) {
       }
 
       Object.assign(this.storage, { dispatch: dispatch })
-      return render(this, state)
+      return render(null, this, Object.freeze(state))
 
     },
 
@@ -356,13 +346,23 @@ var view = (function(document, undefined) {
       this.id = id
       var $root = document.getElementById(id)
       if ($root) $root.innerHTML = ''
-      return render(this)
+      return render(null, this)
     },
 
   }
 
-  function render(view, state) { 
-    var start = performance.now()
+  const _store = (root, template) => {
+
+    
+
+  }
+
+  const _component = (selector, template) => {
+    const root = document.querySelector(selector)
+    return _store(root, template)
+  }
+
+  function render(root, view, state) { 
 
     var storage = view.storage
     if (state) storage.state = state
@@ -370,10 +370,7 @@ var view = (function(document, undefined) {
     var id = view.id
     var $root = document.getElementById(id)
 
-    if ($root) {
-      vDOM[id] = updateComponents($root, view.components , vDOM[id], storage)
-      view.storage.on.mount = false
-    }
+    if ($root) vDOM[id] = updateComponents($root, view.components , vDOM[id], storage)
 
     return Object.assign(view, { storage: storage })
 
@@ -382,16 +379,13 @@ var view = (function(document, undefined) {
   function View(components) {
     return Object.assign(this, prototype, {
       components: components,
-      storage: { on: { mount: false }},
+      storage: {},
       id: '',
     })
   }
 
-  function constructor() {
-    return new View(arguments) 
+  return function() {
+    return (id, state, vDOM) => new View(arguments).store(state, vDOM).mount(id)
   }
-
-  return constructor
-
 
 })(document)

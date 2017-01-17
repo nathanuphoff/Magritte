@@ -3,10 +3,10 @@ const TableRow = (item, index) => ({ dispatch, state }) => {
   const { id, text, href, selected } = item
   const { updateRowSelected, deleteRow } = events(dispatch)
 
-  return [ 'tr', { className:(selected && 'selected') },
+  return [ 'tr', { className:selected && 'selected' },
     ['td', { className:'col-md-1' }, id],
     ['td', { className:'col-md-4' },
-      ['a', { href, onclick:updateRowSelected(index) }, text]
+      ['a', { href, onclick:updateRowSelected(index) }, text, id > 50 ? 'a' : 'b']
     ],
     ['td', { className:'col-md-1' },
       ['button', { type:'button', onclick:deleteRow(index) },
