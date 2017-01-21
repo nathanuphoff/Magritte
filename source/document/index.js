@@ -1,1 +1,2 @@
-export createElement from './createElement'
+export { appendContent } from './appendContent'
+export { createElement } from './createElement'

@@ -53,23 +53,7 @@ var view = (function(document, undefined) {
     if (vDOM.length) {
 
       while (++index < length) {
-        
-<<<<<<< Updated upstream
-        const $component = childNodes[index]      
-        let component = components[index]
-        
-        while (typeof component === typeFunction) component = component(state)
-        
-        if (component instanceof _Array) {
-          vDOM[index] = updateElement($root, $component, component, vDOM[index], state)
-        }
-        else if (contentPattern.test(componentType)) {
-          vDOM[index] = updateContent($root, $component, component, vDOM[index], state)
-        }
-        else vDOM[index] = null
-                
-        
-=======
+
         var component = components[index]
         var node = childNodes[index]
         var vContent = vDOM[index]
@@ -90,7 +74,6 @@ var view = (function(document, undefined) {
           vDOM[index] = updateContent(root, node, component, vContent, state)
         }
 
->>>>>>> Stashed changes
       }
 
       while (childNodes.length > index) {
@@ -112,17 +95,12 @@ var view = (function(document, undefined) {
 
     while (++index < length) {
 
-<<<<<<< Updated upstream
-      let component = components[index]
-      while (typeof component === typeFunction) component = component(state)
-=======
       var component = components[index]
       var type = typeof component
       while (type === typeFunction) {
         component = component(state)
         type = typeof component
       }
->>>>>>> Stashed changes
 
       if (component instanceof _Array) {
         vDOM[index] = renderElement(root, component, state)
@@ -139,20 +117,6 @@ var view = (function(document, undefined) {
   }
 
   // element
-<<<<<<< Updated upstream
-  var elementCache = {} // done
-  function createElement(tagName) {
-  
-    if (elementCache[tagName]) return elementCache[tagName].cloneNode(false) 
-    else {
-      var $element = svgPattern.test(tagName) 
-        ? document.createElementNS(svgNameSpace, tagName)
-        : document.createElement(tagName)
-      elementCache[tagName] = $element
-      return $element.cloneNode(false)
-    }
-
-=======
   var elementCache = {}
   function createElement(type) {
     return (elementCache[type] = elementCache[type]
@@ -161,7 +125,6 @@ var view = (function(document, undefined) {
         ? document.createElementNS(svgNameSpace, type)
         : document.createElement(type)
     ).cloneNode()
->>>>>>> Stashed changes
   }
 
   function renderElement(parent, template, state, $current) {

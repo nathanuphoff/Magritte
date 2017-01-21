@@ -15,7 +15,7 @@ This is an experimental view library using a virtual DOM. Updates to the DOM and
 - Store immutability,
 - Template middleware,
 - A router,
-- A functional interface,
+- ~~A functional interface~~,
 - Multiple elements per component,
 - ES6 and modules,
 - Rollup.

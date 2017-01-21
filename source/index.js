@@ -1,11 +1,5 @@
 import { assign } from './_'
-import component from './component'
-import render from './render'
-import route from './route'
-import store from './store'
+import component, { route } from './component'
+import { renderContent } from './content'
 
-export default assign(component, {
-	render,
-	route,
-	store,
-})
+export default assign(component, { renderContent })
