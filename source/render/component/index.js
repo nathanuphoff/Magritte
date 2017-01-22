@@ -3,11 +3,14 @@ import { renderElement } from '../element'
 
 export function component(node, template, abstract, store) {
   
-  return renderElement(node, template, abstract || {
-    childNodes: [],
+  console.log('render start')
+  abstract = renderElement(node, template, abstract || {
     attributes: {},
+    vdom: [],
     type: null,
     node,
   }, store)
+  
+  return abstract
   
 }

@@ -195,6 +195,7 @@ var slicedToArray = function () {
 function distill(content, store, type, kind) {
 
   var pipe = type === undefined;
+  if (content == null) content = null;
 
   type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   while (type == 'function') {
@@ -204,8 +205,10 @@ function distill(content, store, type, kind) {
 
   var flow = pipes[type];
 
-  if (content != '[object Object]') {
-    if (content instanceof _Array) kind = content[0];else if (/st|nu/.test(type)) kind = null;
+  if (content instanceof _Array) {
+    kind = content[0];
+    type = 'node';
+  } else if (/st|nu/.test(type)) {
     type = 'node';
   }
 
@@ -218,14 +221,26 @@ function createElement(type, namespace) {
 	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
 }
 
-function renderContent$1(parent, content, abstract, store) {
+function renderContent$1(parent, content) {
+  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var store = arguments[3];
 
-  var createNode = abstract == null || abstract.type;
+
+  var createNode = !abstract.node || abstract.type;
   var node = createNode ? document.createTextNode(content) : abstract.node;
 
   if (abstract && abstract.type) parent.replaceChild(node, abstract.node);else if (createNode) parent.appendChild(node);else if (abstract.content !== content) node.nodeValue = content;
 
   return { content: content, node: node };
+}
+
+function renderAttributes$1(node, content, abstract) {
+  if (abstract) for (var key in content) {
+    if (abstract[key] !== content[key]) node[key] = content[key];
+  } else for (var _key in content) {
+    node[_key] = content[_key];
+  }
+  return content;
 }
 
 function renderElement(parent, template) {
@@ -240,13 +255,11 @@ function renderElement(parent, template) {
   var createNode = type !== abstract.type;
   var node = createNode ? createElement(type, namespace) : abstract.node;
 
-  var vdom = createNode ? [] : abstract.childNodes;
-  var childNodes = [];
+  var vdom = createNode ? [type] : abstract.vdom;
   var attributes = {};
 
   var length = template.length;
   var index = !!type - 1;
-  var childIndex = 0;
 
   while (++index < length) {
     var _distill = distill(template[index], store),
@@ -255,39 +268,63 @@ function renderElement(parent, template) {
         _type = _distill2[1],
         kind = _distill2[2];
 
-    if (content === true) console.log(_type, kind);
+    var child = vdom[index] || {};
 
-    if (_type == 'node') {
-      var child = vdom[childIndex];
-      if (content) {
-        childNodes[childIndex] = (kind ? renderElement : renderContent$1)(node, content, child, store, namespace);
-      } else if (child && child.node) node.removeChild(child.node);
-      ++childIndex;
-    } else if (_type == 'object') assign(attributes, content);
+    if (content === true) {
+      
+
+      var _distill3 = distill(child.vdom);
+
+      var _distill4 = slicedToArray(_distill3, 3);
+
+      content = _distill4[0];
+      _type = _distill4[1];
+      kind = _distill4[2];
+    } else if (_type == 'node') {
+      // console.log('child', kind, child)
+      vdom[index] = (kind ? renderElement : renderContent$1)(node, content, child, store, namespace);
+    } else if (_type == 'object') {
+      vdom[index] = null;
+      if (content == null) {
+        var childNode = child.node;
+        if (childNode) node.removeChild(childNode);
+      } else assign(attributes, content);
+    } else vdom[index] = child;
   }
 
-  assign(node, attributes);
+  assign(attributes, renderAttributes$1(node, attributes, abstract.attributes));
+
+  if (createNode) {
+    // console.log('createNode', type, node)
+    // console.log('createNode', type, domNode)
+    parent.appendChild(node);
+  }
 
   // remove excess children
-  while (childIndex < vdom.length) {
-    if (vdom[childIndex]) node.removeChild(vdom[childIndex].node);
-    ++childIndex;
+  while (index < vdom.length) {
+    var _child = vdom[index];
+    if (_child) node.removeChild(_child.node);
+    index++;
   }
+  vdom.length = length;
 
   // add/replace child elements
-  if (!abstract.node) parent.appendChild(node);else if (createNode) parent.replaceChild(node, abstract.node);
 
-  return { type: type, node: node, childNodes: childNodes, attributes: attributes };
+
+  return { type: type, node: node, vdom: vdom, attributes: attributes };
 }
 
 function component$1(node, template, abstract, store) {
 
-  return renderElement(node, template, abstract || {
-    childNodes: [],
+  console.log('render start');
+  abstract = renderElement(node, template, abstract || {
     attributes: {},
+    vdom: [],
     type: null,
     node: node
   }, store);
+
+  return abstract;
 }
 
 function render(root, template) {

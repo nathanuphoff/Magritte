@@ -4,6 +4,7 @@ import { pipes } from '../pipe'
 export function distill(content, store, type, kind) {
   
   const pipe = type === undefined
+  if (content == null) content = null
 
   type = typeof content
   while (type == 'function') {
@@ -13,9 +14,11 @@ export function distill(content, store, type, kind) {
 
   const flow = pipes[type]
   
-  if (content != '[object Object]') {
-    if (content instanceof _Array) kind = content[0]
-    else if (/st|nu/.test(type)) kind = null
+  if (content instanceof _Array) {
+    kind = content[0]
+    type = 'node'
+  }
+  else if (/st|nu/.test(type)) {
     type = 'node'
   }
   

@@ -1,8 +1,8 @@
 import { _document } from '../../_'
 
-export function renderContent(parent, content, abstract, store) {
+export function renderContent(parent, content, abstract = {}, store) {
   
-  const createNode = abstract == null || abstract.type
+  const createNode = !abstract.node || abstract.type
   const node = createNode ? document.createTextNode(content) : abstract.node
   
   if (abstract && abstract.type) parent.replaceChild(node, abstract.node)

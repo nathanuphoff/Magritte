@@ -17,7 +17,7 @@ const ListPeople = store => map(Person(store))
 
 const People = ({ state, dispatch }) =>
   ['section',
-    state.list.length ? h2("People") : true,
+    state.list.length ? h2("People") : false,
     state.list.length 
       ? ul(...ListPeople({ state, dispatch })(state.list)) 
       : null,
