@@ -3,13 +3,17 @@ import { renderElement } from '../element'
 
 export function component(node, template, abstract, store) {
   
-  console.log('render start')
+  const start = performance.now()
+  
   abstract = renderElement(node, template, abstract || {
-    attributes: {},
-    vdom: [],
-    type: null,
     node,
+    type: null,    
+    vdom: [],    
+    attributes: {},
   }, store)
+  
+  const duration = Math.floor((performance.now() - start) * 100) / 100
+  console.log('frame time: ' + duration + 'ms, fps: ' + Math.floor(1000 / duration))
   
   return abstract
   

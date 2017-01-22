@@ -10,6 +10,13 @@ var freeze = _Object$1.freeze;
 var _document = document;
 var _Array = Array;
 
+
+var _null = null;
+
+
+var objectType = 'object';
+var nodeType = 'node';
+
 function store(component, state, abstract) {
 
   var initialState = assign({}, state);
@@ -221,17 +228,14 @@ function createElement(type, namespace) {
 	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
 }
 
-function renderContent$1(parent, content) {
-  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var store = arguments[3];
-
+function renderContent$1(parent, content, abstract, store) {
 
   var createNode = !abstract.node || abstract.type;
   var node = createNode ? document.createTextNode(content) : abstract.node;
 
   if (abstract && abstract.type) parent.replaceChild(node, abstract.node);else if (createNode) parent.appendChild(node);else if (abstract.content !== content) node.nodeValue = content;
 
-  return { content: content, node: node };
+  return { node: node, content: content };
 }
 
 function renderAttributes$1(node, content, abstract) {
@@ -249,7 +253,7 @@ function renderElement(parent, template) {
   var namespace = arguments[4];
 
 
-  var type = abstract.node === parent ? null : template[0];
+  var type = abstract.node === parent ? _null : template[0];
   if (type === 'svg') namespace = svgNamespace;
 
   var createNode = type !== abstract.type;
@@ -260,7 +264,6 @@ function renderElement(parent, template) {
 
   var length = template.length;
   var index = !!type - 1;
-
   while (++index < length) {
     var _distill = distill(template[index], store),
         _distill2 = slicedToArray(_distill, 3),
@@ -280,28 +283,20 @@ function renderElement(parent, template) {
       content = _distill4[0];
       _type = _distill4[1];
       kind = _distill4[2];
-    } else if (_type == 'node') {
-      // console.log('child', kind, child)
-      vdom[index] = (kind ? renderElement : renderContent$1)(node, content, child, store, namespace);
-    } else if (_type == 'object') {
-      vdom[index] = null;
-      if (content == null) {
+    }if (_type == nodeType) vdom[index] = (kind ? renderElement : renderContent$1)(node, content, child, store, namespace);else if (_type == objectType) {
+      vdom[index] = _null;
+      if (content == _null) {
         var childNode = child.node;
         if (childNode) node.removeChild(childNode);
       } else assign(attributes, content);
     } else vdom[index] = child;
   }
 
+  // render element attributes
   assign(attributes, renderAttributes$1(node, attributes, abstract.attributes));
 
-  if (createNode) {
-    // console.log('createNode', type, node)
-    // console.log('createNode', type, domNode)
-    parent.appendChild(node);
-  }
-
-  // remove excess children
-  while (index < vdom.length) {
+  // add/remove children
+  if (createNode) parent.appendChild(node);else while (index < vdom.length) {
     var _child = vdom[index];
     if (_child) node.removeChild(_child.node);
     index++;
@@ -311,18 +306,22 @@ function renderElement(parent, template) {
   // add/replace child elements
 
 
-  return { type: type, node: node, vdom: vdom, attributes: attributes };
+  return { node: node, type: type, vdom: vdom, attributes: attributes };
 }
 
 function component$1(node, template, abstract, store) {
 
-  console.log('render start');
+  var start = performance.now();
+
   abstract = renderElement(node, template, abstract || {
-    attributes: {},
-    vdom: [],
+    node: node,
     type: null,
-    node: node
+    vdom: [],
+    attributes: {}
   }, store);
+
+  var duration = Math.floor((performance.now() - start) * 100) / 100;
+  console.log('frame time: ' + duration + 'ms, fps: ' + Math.floor(1000 / duration));
 
   return abstract;
 }
