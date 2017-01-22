@@ -1,19 +1,14 @@
+import { pipe } from '../../_'
 export const pipes = {}
 
 export const prepare = key => (...methods) => {
-  switch (methods.length) {
-    case 0: pipes[key] = null
-    break
-    case 1: pipes[key] = methods[0]
-    break
-    default: pipes[key] = flow(methods)
+  const length = methods.length
+  if (length) {
+    if (length > 1) pipes[key] = pipe(methods)
+    else pipes[key] = methods[0]
   }
 }
 
 export const renderString = prepare('string')
 export const renderNumber = prepare('number')
 export const renderAttributes = prepare('object')
-
-function flow(methods) {
-  return value => methods.reduce((value, callback) => callback(value), value)
-}

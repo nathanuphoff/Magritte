@@ -2,20 +2,49 @@ document.write('<script src="http://' + (location.host || 'localhost').split(':'
 var x = (function () {
 'use strict';
 
-var _Object$1 = Object;
+function pipe(methods) {
+	return function (value) {
+		return methods.reduce(function (value, callback) {
+			return callback(value);
+		}, value);
+	};
+}
 
-var assign = _Object$1.assign;
-var freeze = _Object$1.freeze;
+function assign() {
+
+	var data = arguments;
+	var result = data[0];
+	var length = data.length;
+	var index = 0;
+
+	while (++index < length) {
+		var object = data[index];
+		for (var key in object) {
+			result[key] = object[key];
+		}
+	}
+
+	return result;
+}
 
 var _document = document;
 var _Array = Array;
+var _Object = Object;
 
+// export const assign = _Object.assign
+var freeze = _Object.freeze;
 
+var _undefined = undefined;
 var _null = null;
 
-
+var functionType = 'function';
 var objectType = 'object';
+
+
 var nodeType = 'node';
+
+
+var contentPattern = /^st|nu/;
 
 function store(component, state, abstract) {
 
@@ -48,15 +77,9 @@ var prepare = function prepare(key) {
       methods[_key] = arguments[_key];
     }
 
-    switch (methods.length) {
-      case 0:
-        pipes[key] = null;
-        break;
-      case 1:
-        pipes[key] = methods[0];
-        break;
-      default:
-        pipes[key] = flow(methods);
+    var length = methods.length;
+    if (length) {
+      if (length > 1) pipes[key] = pipe(methods);else pipes[key] = methods[0];
     }
   };
 };
@@ -64,14 +87,6 @@ var prepare = function prepare(key) {
 var renderString = prepare('string');
 var renderNumber = prepare('number');
 var renderAttributes = prepare('object');
-
-function flow(methods) {
-  return function (value) {
-    return methods.reduce(function (value, callback) {
-      return callback(value);
-    }, value);
-  };
-}
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -202,11 +217,11 @@ var slicedToArray = function () {
 
 function distill(content, store, type, kind) {
 
-  var pipe = type === undefined;
-  if (content == null) content = null;
+  var pipe$$1 = type === _undefined;
+  if (content == _null) content = _null;
 
   type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
-  while (type == 'function') {
+  while (type == functionType) {
     content = content(store);
     type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   }
@@ -215,12 +230,12 @@ function distill(content, store, type, kind) {
 
   if (content instanceof _Array) {
     kind = content[0];
-    type = 'node';
-  } else if (/st|nu/.test(type)) {
-    type = 'node';
+    type = nodeType;
+  } else if (contentPattern.test(type)) {
+    type = nodeType;
   }
 
-  return pipe && flow ? distill(flow(content), store, type) : [content, type, kind];
+  return pipe$$1 && flow ? distill(flow(content), store, type) : [content, type, kind];
 }
 
 var elementCache = {};

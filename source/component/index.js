@@ -1,4 +1,4 @@
-import { _document, _null, svgNameSpace, svgPattern } from '../_'
+import { _document, _null } from '../_'
 import store from '../store'
 import render from '../render'
 
@@ -15,5 +15,5 @@ export default function() {
 
 export function route() {
   const parameters = arguments
-  return template => store => true ? template : _null
+  return template => store => 'match' ? template : _null
 }

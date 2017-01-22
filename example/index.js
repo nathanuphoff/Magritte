@@ -9,7 +9,9 @@ const state = {
 // const toUpperCase = value => value.toUpperCase()
 // x.renderString(toUpperCase)
 
-const dispatch = x(
+const component = x(
   Title,
   People
-)('#app', state)
+)
+
+const dispatch = component('#root', state)
