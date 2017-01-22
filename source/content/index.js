@@ -1,2 +1,2 @@
 export { distill } from './distill'
-export { renderContent, renderAttributes } from './pipe'
+export { renderString, renderNumber, renderAttributes } from './pipe'

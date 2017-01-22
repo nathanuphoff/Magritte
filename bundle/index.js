@@ -61,8 +61,9 @@ var prepare = function prepare(key) {
   };
 };
 
-var renderContent = prepare('content');
-
+var renderString = prepare('string');
+var renderNumber = prepare('number');
+var renderAttributes = prepare('object');
 
 function flow(methods) {
   return function (value) {
@@ -228,7 +229,7 @@ function createElement(type, namespace) {
 	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
 }
 
-function renderContent$1(parent, content, abstract, store) {
+function renderContent(parent, content, abstract, store) {
 
   var createNode = !abstract.node || abstract.type;
   var node = createNode ? document.createTextNode(content) : abstract.node;
@@ -283,7 +284,7 @@ function renderElement(parent, template) {
       content = _distill4[0];
       _type = _distill4[1];
       kind = _distill4[2];
-    }if (_type == nodeType) vdom[index] = (kind ? renderElement : renderContent$1)(node, content, child, store, namespace);else if (_type == objectType) {
+    }if (_type == nodeType) vdom[index] = (kind ? renderElement : renderContent)(node, content, child, store, namespace);else if (_type == objectType) {
       vdom[index] = _null;
       if (content == _null) {
         var childNode = child.node;
@@ -342,7 +343,11 @@ var component = function () {
   };
 };
 
-var index = assign(component, { renderContent: renderContent });
+var index = assign(component, {
+	renderString: renderString,
+	renderNumber: renderNumber,
+	renderAttributes: renderAttributes
+});
 
 return index;
 

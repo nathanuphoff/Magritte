@@ -1,5 +1,9 @@
 import { assign } from './_'
 import component, { route } from './component'
-import { renderContent } from './content'
+import { renderString, renderNumber, renderAttributes } from './content'
 
-export default assign(component, { renderContent })
+export default assign(component, { 
+	renderString, 
+	renderNumber,
+	renderAttributes,
+})

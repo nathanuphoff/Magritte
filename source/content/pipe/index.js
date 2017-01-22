@@ -10,7 +10,8 @@ export const prepare = key => (...methods) => {
   }
 }
 
-export const renderContent = prepare('content')
+export const renderString = prepare('string')
+export const renderNumber = prepare('number')
 export const renderAttributes = prepare('object')
 
 function flow(methods) {
