@@ -5,10 +5,10 @@ import render from '../render'
 export default function() {
 
   const template = arguments
-  return (selector, state, vDOM = []) => {  
+  return function(selector, state, abstract) {  
     const root = _document.querySelector(selector)
     const component = render(root, template)
-    return store(component, state, vDOM)
+    return store(component, state, abstract)
   }
 
 }

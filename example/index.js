@@ -1,11 +1,13 @@
 'use strict'
 
-const title = store => {
-  console.log('title', store)
-  return ['h1', { className: 'test' }, "Hello"]
+const state = {
+  title: "Hello World!",
+  list: ["Nathan", "Irene", "Hans"],
 }
 
 const dispatch = x(
   Title,
   People
 )('#app', state)
+
+// console.log(dispatch.toString())

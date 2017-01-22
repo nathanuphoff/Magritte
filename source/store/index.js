@@ -1,6 +1,6 @@
 import { assign, freeze } from '../_'
 
-export default function store(component, state, vDOM) {
+export default function store(component, state, abstract) {
   
   const initialState = assign({}, state)
 
@@ -12,9 +12,11 @@ export default function store(component, state, vDOM) {
 
     if (action == '[object Object]') {
       state = freeze(assign({}, state, action))
-      vDOM = component({ dispatch, state }, vDOM)
+      abstract = component({ dispatch, state }, abstract)
     }
-    else if (action != null) console.warn("action is expected to be a function, plain Object, null, or undefined", action)
+    else if (action != null) {
+    		console.warn("action is expected to be a function, plain Object, null, or undefined", action)
+    }
    
     return dispatch
 

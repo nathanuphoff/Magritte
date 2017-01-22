@@ -1,0 +1,8 @@
+h1, h2, ul, li {
+	display: block;
+}
+
+button {
+	display: inline-block;
+	background: #eee;
+}

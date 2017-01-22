@@ -8,11 +8,9 @@ var assign = _Object$1.assign;
 var freeze = _Object$1.freeze;
 
 var _document = document;
+var _Array = Array;
 
-var svgNameSpace = 'http://www.w3.org/2000/svg';
-var svgPattern = /circle|clipPath|defs|ellipse|g|image|line|linearGradient|mask|path|pattern|polygon|polyline|radialGradient|rect|stop|svg|symbol|text|tspan/;
-
-function store(component, state, vDOM) {
+function store(component, state, abstract) {
 
   var initialState = assign({}, state);
 
@@ -24,8 +22,10 @@ function store(component, state, vDOM) {
 
     if (action == '[object Object]') {
       state = freeze(assign({}, state, action));
-      vDOM = component({ dispatch: dispatch, state: state }, vDOM);
-    } else if (action != null) console.warn("action is expected to be a function, plain Object, null, or undefined", action);
+      abstract = component({ dispatch: dispatch, state: state }, abstract);
+    } else if (action != null) {
+      console.warn("action is expected to be a function, plain Object, null, or undefined", action);
+    }
 
     return dispatch;
   }
@@ -205,7 +205,7 @@ function distill(content, store, type, kind) {
   var flow = pipes[type];
 
   if (content != '[object Object]') {
-    if (content instanceof Array) kind = content[0];else if (/st|nu/.test(type)) kind = null;
+    if (content instanceof _Array) kind = content[0];else if (/st|nu/.test(type)) kind = null;
     type = 'node';
   }
 
@@ -213,36 +213,41 @@ function distill(content, store, type, kind) {
 }
 
 var elementCache = {};
-function createElement(type) {
+function createElement(type, namespace) {
 
-	return elementCache[type] = (elementCache[type] ? elementCache[type] : svgPattern.test(type) ? _document.createElementNS(svgNameSpace, type) : _document.createElement(type)).cloneNode(false);
+	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
 }
 
-function renderContent$1(parent, node, content, abstract, store) {
-  if (node) {
-    // console.log('renderContent', node, content, abstract)
-    node.nodeValue = content;
-  } else {
-    node = document.createTextNode(content);
-    parent.appendChild(node);
-  }
+function renderContent$1(parent, content, abstract, store) {
+
+  var createNode = abstract == null || abstract.type;
+  var node = createNode ? document.createTextNode(content) : abstract.node;
+
+  if (abstract && abstract.type) parent.replaceChild(node, abstract.node);else if (createNode) parent.appendChild(node);else if (abstract.content !== content) node.nodeValue = content;
+
   return { content: content, node: node };
 }
 
-function renderElement(parent, x, template) {
-  var abstract = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-  var store = arguments[4];
+function renderElement(parent, template) {
+  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var store = arguments[3];
+  var namespace = arguments[4];
 
 
-  var type = template[0];
-  var newElement = abstract.type !== type;
-  var node = newElement ? createElement(type) : abstract.node;
-  var children = abstract.children || [];
-  var childCount = 0;
-  var child = node.firstChild;
+  var type = abstract.node === parent ? null : template[0];
+  if (type === 'svg') namespace = svgNamespace;
+
+  var createNode = type !== abstract.type;
+  var node = createNode ? createElement(type, namespace) : abstract.node;
+
+  var vdom = createNode ? [] : abstract.childNodes;
+  var childNodes = [];
+  var attributes = {};
 
   var length = template.length;
-  var index = 0;
+  var index = !!type - 1;
+  var childIndex = 0;
+
   while (++index < length) {
     var _distill = distill(template[index], store),
         _distill2 = slicedToArray(_distill, 3),
@@ -250,65 +255,54 @@ function renderElement(parent, x, template) {
         _type = _distill2[1],
         kind = _distill2[2];
 
+    if (content === true) console.log(_type, kind);
+
     if (_type == 'node') {
-      var method = kind ? renderElement : renderContent$1;
-      children[childCount] = method(node, child, content, children[childCount], store);
-      if (child) child = child.nextSibling;
-      childCount++;
-    } else if (_type == 'object') Object.assign(node, content);
+      var child = vdom[childIndex];
+      if (content) {
+        childNodes[childIndex] = (kind ? renderElement : renderContent$1)(node, content, child, store, namespace);
+      } else if (child && child.node) node.removeChild(child.node);
+      ++childIndex;
+    } else if (_type == 'object') assign(attributes, content);
   }
 
-  if (newElement) {
-    console.log(node);
-    if (abstract.node) {
-      parent.replaceChild(node, abstract.node);
-    } else parent.appendChild(node);
-  } else if (childCount < abstract.childCount) {
-    while (child) {
-      node.removeChild(child);
-      child = child.nextSibling;
-    }
-    children.length = childCount;
+  assign(node, attributes);
+
+  // remove excess children
+  while (childIndex < vdom.length) {
+    if (vdom[childIndex]) node.removeChild(vdom[childIndex].node);
+    ++childIndex;
   }
 
-  return { type: type, node: node, children: children, childCount: childCount };
+  // add/replace child elements
+  if (!abstract.node) parent.appendChild(node);else if (createNode) parent.replaceChild(node, abstract.node);
+
+  return { type: type, node: node, childNodes: childNodes, attributes: attributes };
 }
 
-function component$1(parent, child, template) {
-  var abstract = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-  var store = arguments[4];
+function component$1(node, template, abstract, store) {
 
-
-  var index = -1;
-  while (++index < template.length) {
-    var _distill = distill(template[index], store),
-        _distill2 = slicedToArray(_distill, 3),
-        content = _distill2[0],
-        type = _distill2[1],
-        kind = _distill2[2];
-
-    abstract[index] = renderElement(parent, child, content, abstract[index], store, true);
-    if (child) child = child.nextSibling;
-  }
-
-  return abstract;
+  return renderElement(node, template, abstract || {
+    childNodes: [],
+    attributes: {},
+    type: null,
+    node: node
+  }, store);
 }
 
 function render(root, template) {
-  return function (store, vDOM) {
-    return component$1(root, root.firstChild, template, vDOM, store);
+  return function (store, abstract) {
+    return component$1(root, template, abstract, store);
   };
 }
 
 var component = function () {
 
   var template = arguments;
-  return function (selector, state) {
-    var vDOM = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
+  return function (selector, state, abstract) {
     var root = _document.querySelector(selector);
     var component = render(root, template);
-    return store(component, state, vDOM);
+    return store(component, state, abstract);
   };
 };
 

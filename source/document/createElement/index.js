@@ -1,13 +1,12 @@
-import { _document, svgNameSpace, svgPattern } from '../../_'
+import { _document } from '../../_'
 
 const elementCache = {}
-export function createElement(type) {
+export function createElement(type, namespace) {
 	
-	return elementCache[type] = (elementCache[type]
-		? elementCache[type]
-		: svgPattern.test(type)
-			? _document.createElementNS(svgNameSpace, type)
-			: _document.createElement(type)
+	return elementCache[type] = (
+		elementCache[type]
+			? elementCache[type]
+			: namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)
 	).cloneNode(false)
 	
 }

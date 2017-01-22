@@ -15,12 +15,10 @@ const Person = ({ dispatch }) => (value, index, list) => {
 
 const ListPeople = store => map(Person(store))
 
-const People = ({ state, dispatch }) => {
-  // console.log(state.list)
-  return ['section',
-    h2("People"),
+const People = ({ state, dispatch }) =>
+  ['section',
+    state.list.length ? h2("People") : true,
     state.list.length 
       ? ul(...ListPeople({ state, dispatch })(state.list)) 
-      : h3("Nothing here"),
+      : null,
   ]
-}

@@ -1,48 +1,54 @@
-import { contentPattern } from '../../_'
+import { contentPattern, assign, svgNameSpace } from '../../_'
 import { createElement } from '../../document'
 import { distill } from '../../content'
 import { renderContent } from '../content'
 
-export function renderElement(parent, x, template, abstract = [], store) {
+export function renderElement(parent, template, abstract = {}, store, namespace) {
 
-  const type = template[0]
-  const newElement = abstract.type !== type
-  const node = newElement ? createElement(type) : abstract.node
-  const children = abstract.children || []
-  let childCount = 0
-  let child = node.firstChild
+  const type = abstract.node === parent ? null : template[0]
+  if (type === 'svg') namespace = svgNamespace
+
+  const createNode = type !== abstract.type
+  const node = createNode ? createElement(type, namespace) : abstract.node
+  
+  const vdom = createNode ? [] : abstract.childNodes
+  const childNodes = []
+  const attributes = {}
 
   const length = template.length
-  let index = 0
+  let index = !!type - 1
+  let childIndex = 0
+
   while (++index < length) {
 
     const [content, type, kind] = distill(template[index], store)
+    
+    if (content === true) console.log(type, kind)
 
     if (type == 'node') {
-      const method = kind ? renderElement : renderContent
-      children[childCount] = method(node, child, content, children[childCount], store)
-      if (child) child = child.nextSibling
-      childCount++
+      const child = vdom[childIndex]
+      if (content) {
+        childNodes[childIndex] = (kind ? renderElement : renderContent)(node, content, child, store, namespace)
+      }
+      else if (child && child.node)  node.removeChild(child.node)      
+      ++childIndex
     }
-    else if (type == 'object') Object.assign(node, content)
+    else if (type == 'object') assign(attributes, content)
 
   }
-  
-  if (newElement) {
-    console.log(node)
-    if (abstract.node) {
-      parent.replaceChild(node, abstract.node)
-    }
-    else parent.appendChild(node)
-  }
-  else if (childCount < abstract.childCount) {
-    while (child) {
-      node.removeChild(child)
-      child = child.nextSibling
-    }
-    children.length = childCount
+
+  assign(node, attributes)
+
+  // remove excess children
+  while (childIndex < vdom.length) {
+    if (vdom[childIndex]) node.removeChild(vdom[childIndex].node)
+    ++childIndex
   }
 
-  return { type, node, children, childCount }
+  // add/replace child elements
+  if (!abstract.node) parent.appendChild(node)
+  else if (createNode) parent.replaceChild(node, abstract.node)
+
+  return { type, node, childNodes, attributes }
 
 }
