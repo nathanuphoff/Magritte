@@ -1,14 +1,14 @@
-import { pipe } from '../../_'
+import { _null, pipe, stringType, numberType, objectType } from '../../_'
 export const pipes = {}
 
-export const prepare = key => (...methods) => {
+export const prepare = key => function() {
+  const methods = arguments
   const length = methods.length
-  if (length) {
-    if (length > 1) pipes[key] = pipe(methods)
-    else pipes[key] = methods[0]
-  }
+  pipes[key] = length > 1 
+    ? pipe(methods) 
+    : length ? methods[0] : _null
 }
 
-export const renderString = prepare('string')
-export const renderNumber = prepare('number')
-export const renderAttributes = prepare('object')
+export const renderString = prepare(stringType)
+export const renderNumber = prepare(numberType)
+export const renderAttributes = prepare(objectType)

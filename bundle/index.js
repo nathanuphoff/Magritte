@@ -31,7 +31,6 @@ var _document = document;
 var _Array = Array;
 var _Object = Object;
 
-// export const assign = _Object.assign
 var freeze = _Object.freeze;
 
 var _undefined = undefined;
@@ -39,8 +38,8 @@ var _null = null;
 
 var functionType = 'function';
 var objectType = 'object';
-
-
+var stringType = 'string';
+var numberType = 'number';
 var nodeType = 'node';
 
 
@@ -73,20 +72,15 @@ var pipes = {};
 
 var prepare = function prepare(key) {
   return function () {
-    for (var _len = arguments.length, methods = Array(_len), _key = 0; _key < _len; _key++) {
-      methods[_key] = arguments[_key];
-    }
-
+    var methods = arguments;
     var length = methods.length;
-    if (length) {
-      if (length > 1) pipes[key] = pipe(methods);else pipes[key] = methods[0];
-    }
+    pipes[key] = length > 1 ? pipe(methods) : length ? methods[0] : _null;
   };
 };
 
-var renderString = prepare('string');
-var renderNumber = prepare('number');
-var renderAttributes = prepare('object');
+var renderString = prepare(stringType);
+var renderNumber = prepare(numberType);
+var renderAttributes = prepare(objectType);
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;

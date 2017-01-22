@@ -4,17 +4,18 @@ This is an experimental view library using a virtual DOM. Updates to the DOM and
 
 To try it run `npm install` && `npm start`, then open localhost:10001/example/ in your browser.
 
+## Why
+This is an experiment to see if I could get a reactive virtual DOM library going while favouring composition over inheritance. *X* is entirely free of `this` and all props are passed through children by default. The template syntax is entirely JSON compatible and could therefore theoretically be pre-rendered using any language.
 
 ## Features
-
 - Virtual DOM,
 - Incremental updates,
 - Built in store and dispatcher,
 - Template middleware,
 - A functional interface,
-- ES6 and modules,
-- Rollup build process,
-- Give or take 4Kb in size.
+- No build pipeline required,
+- Modular,
+- Give or take 4Kb in size (1.5Kb with gzip).
 
 ## Coming Soon™
 - A decoupled DOM (for isomorphic rendering),

@@ -5,7 +5,6 @@ export const _document = document
 export const _Array = Array
 export const _Object = Object
 
-// export const assign = _Object.assign
 export const freeze = _Object.freeze
 
 export const _undefined = undefined

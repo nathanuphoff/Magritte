@@ -2,7 +2,7 @@
 
 const state = {
   title: "Hello World!",
-  list: ["Nathan", "Irene", "Hans"],
+  list: ["a", "b", "c"],
 }
 
 // by uncommenting the rules below all element textContent will be in uppercase
