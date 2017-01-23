@@ -3,14 +3,20 @@ import { svgAttributeNameSpace } from '../../_'
 export function renderAttributes(node, content, abstract) {
   if (abstract) for (const key in content) {
     const value = content[key]
-    if (abstract[key] !== value) {
-      node[key] = value
+    if (!/^on/.test(key) && value !== abstract[key]) {
+      if (key === 'className') node.setAttribute('class', value)
+      else node[key] = value
     }
   }
   else for (const key in content) {    
-    node[key] = content[key]
+    setAttribute(node, key, content[key])
   }
   return content
+}
+
+function setAttribute(node, key, value) {
+  if (key === 'className') node.setAttribute('class', value)
+  else node[key] = value
 }
 
 export function renderSVGAttributes(node, content, abstract) {

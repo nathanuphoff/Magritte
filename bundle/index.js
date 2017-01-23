@@ -252,13 +252,17 @@ function renderContent(parent, content, abstract, store) {
 function renderAttributes$1(node, content, abstract) {
   if (abstract) for (var key in content) {
     var value = content[key];
-    if (abstract[key] !== value) {
-      node[key] = value;
+    if (!/^on/.test(key) && value !== abstract[key]) {
+      if (key === 'className') node.setAttribute('class', value);else node[key] = value;
     }
   } else for (var _key in content) {
-    node[_key] = content[_key];
+    setAttribute(node, _key, content[_key]);
   }
   return content;
+}
+
+function setAttribute(node, key, value) {
+  if (key === 'className') node.setAttribute('class', value);else node[key] = value;
 }
 
 function renderSVGAttributes(node, content, abstract) {
