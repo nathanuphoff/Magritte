@@ -7,5 +7,6 @@ const ul = compose('ul')
 
 const map = callback => array => array.map(callback)
 const filter = callback => array => array.filter(callback)
+const assign = Object.assign
 
 const removeAtIndex = value => filter((item, index) => index !== value)

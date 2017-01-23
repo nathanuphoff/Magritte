@@ -10,6 +10,7 @@ This is an experiment to see if I could get a reactive virtual DOM library going
 ## Features
 - Virtual DOM,
 - Incremental updates,
+- Supports SVG including namespaced attributes,
 - Built in store and dispatcher,
 - Template middleware,
 - A functional interface,

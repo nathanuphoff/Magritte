@@ -13,7 +13,7 @@ export function component(node, template, abstract, store) {
   }, store)
   
   const duration = Math.floor((performance.now() - start) * 100) / 100
-  console.log('frame time: ' + duration + 'ms, fps: ' + Math.floor(1000 / duration))
+  console.log('frame time: ' + duration + 'ms, ' + Math.floor(1000 / duration) + 'fps')
   
   return abstract
   

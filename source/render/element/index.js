@@ -1,19 +1,19 @@
-import { _null, nodeType, objectType, assign } from '../../_'
+import { _null, nodeType, objectType, assign, svgNameSpace } from '../../_'
 import { createElement } from '../../document'
 import { distill } from '../../content'
 import { renderContent } from '../content'
-import { renderAttributes } from '../attributes'
+import { renderAttributes, renderSVGAttributes } from '../attributes'
 
 export function renderElement(parent, template, abstract = {}, store, namespace) {
 
   const type = abstract.node === parent ? _null : template[0]
-  if (type === 'svg') namespace = svgNamespace
+  if (type === 'svg') namespace = svgNameSpace
 
   const createNode = type !== abstract.type
   const node = createNode ? createElement(type, namespace) : abstract.node
   
   const vdom = createNode ? [type] : abstract.vdom
-  const attributes = {}
+  let attributes = {}
   
   const length = template.length
   let index = !!type - 1
@@ -21,10 +21,12 @@ export function renderElement(parent, template, abstract = {}, store, namespace)
 
     let [content, type, kind] = distill(template[index], store)
     const child = vdom[index] || {}
-        
+
     if (content === true) [content, type, kind] = distill(child.vdom)
     
-    if (type == nodeType) vdom[index] = (kind ? renderElement : renderContent)(node, content, child, store, namespace)
+    if (type == nodeType) {
+      vdom[index] = (kind ? renderElement : renderContent)(node, content, child, store, namespace)
+    }
     else if (type == objectType) {
       vdom[index] = _null
       if (content == _null) {
@@ -38,7 +40,7 @@ export function renderElement(parent, template, abstract = {}, store, namespace)
   }
   
   // render element attributes
-  assign(attributes, renderAttributes(node, attributes, abstract.attributes))
+  attributes = (namespace ? renderSVGAttributes : renderAttributes)(node, attributes, abstract.attributes)
   
   // add/remove children
   if (createNode) parent.appendChild(node)
