@@ -1,4 +1,4 @@
-import { _document, _null } from '../_'
+import { _document } from '../_'
 import store from '../store'
 import render from '../render'
 
@@ -14,7 +14,8 @@ export default function() {
 
 }
 
-export function route() {
-  const parameters = arguments
-  return template => store => 'todo: test for match' ? template : _null
-}
+export { compose } from './compose'
+export { element } from './element'
+export { route } from './route'
+
+

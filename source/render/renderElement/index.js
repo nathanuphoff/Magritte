@@ -1,13 +1,15 @@
-import { _null, nodeType, objectType, assign, svgNameSpace } from '../../_'
-import { createElement } from '../../document'
+import { _null, nodeType, objectType, assign, namespaces, emptyObject } from '../../_'
 import { distill } from '../../content'
-import { renderContent } from '../content'
-import { renderAttributes, renderSVGAttributes } from '../attributes'
 
-export function renderElement(parent, template, abstract = {}, store, namespace) {
+import { createElement } from '../createElement'
+import { renderContent } from '../renderContent'
+import { renderAttributes } from '../renderAttributes'
 
+export function renderElement(parent, template, abstract, store, namespace) {
+
+  abstract = abstract || emptyObject
   const type = abstract.node === parent ? _null : template[0]
-  if (type === 'svg') namespace = svgNameSpace
+  namespace = namespace || namespaces[type]
 
   const createNode = type !== abstract.type
   const node = createNode ? createElement(type, namespace) : abstract.node
@@ -20,7 +22,7 @@ export function renderElement(parent, template, abstract = {}, store, namespace)
   while (++index < length) {
 
     let [content, type, kind] = distill(template[index], store)
-    const child = vdom[index] || {}
+    const child = vdom[index] || emptyObject
 
     if (content === true) [content, type, kind] = distill(child.vdom)
     
@@ -40,7 +42,7 @@ export function renderElement(parent, template, abstract = {}, store, namespace)
   }
   
   // render element attributes
-  attributes = (namespace ? renderSVGAttributes : renderAttributes)(node, attributes, abstract.attributes)
+  attributes = renderAttributes(node, attributes, abstract.attributes, namespace)
   
   // add/remove children
   if (createNode) parent.appendChild(node)
@@ -49,10 +51,7 @@ export function renderElement(parent, template, abstract = {}, store, namespace)
     if (child) node.removeChild(child.node)
     index++
   }
-  vdom.length = length
-
-  // add/replace child elements
-   
+  vdom.length = length   
 
   return { node, type, vdom, attributes }
 

@@ -1,6 +1,6 @@
-import { renderElement } from './element'
+import { renderElement } from './renderElement'
 
-export default function render(node, template) {
+export default function(node, template) {
   return function(store, abstract) {
     return renderElement(node, template, abstract || {
       node,

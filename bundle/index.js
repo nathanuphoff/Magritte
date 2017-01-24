@@ -29,6 +29,10 @@ function assign() {
 	return result;
 }
 
+function slice(value) {
+  return [].slice.call(value, 0);
+}
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -175,10 +179,14 @@ var _document = document;
 
 var _Object = Object;
 
+
+
 var freeze = _Object.freeze;
 
 var _undefined = undefined;
 var _null = null;
+
+var emptyObject = {};
 
 var functionType = 'function';
 var booleanType = 'boolean';
@@ -187,10 +195,46 @@ var stringType = 'string';
 var numberType = 'number';
 var nodeType = 'node';
 
-var svgNameSpace = 'http://www.w3.org/2000/svg';
 var svgAttributeNameSpace = 'http://www.w3.org/1999/xlink';
 
 var contentTypes = (_contentTypes = {}, defineProperty(_contentTypes, stringType, true), defineProperty(_contentTypes, numberType, true), _contentTypes);
+
+var namespaces = {
+  svg: 'http://www.w3.org/2000/svg'
+};
+
+function setAttribute(node, key, value) {
+  if (value == _null || value === false) node.removeAttribute(key);else {
+    if (value === true) value = '';
+    node.setAttribute(key, value);
+  }
+}
+
+var attributeHandlers = {
+  data: function data(node, key, value, match) {
+    var tail = match[2];
+    key = tail[0].toLowerCase() + tail.substr(1);
+    node.dataset[key] = value;
+  },
+  xlink: function xlink(node, key, value, match) {
+    node.setAttributeNS(svgAttributeNameSpace, 'xlink:href', value);
+  },
+
+
+  viewBox: setAttribute,
+
+  aria: function aria(node, key, value, match) {
+    key = match[0].replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    setAttribute(node, key, value);
+  }
+};
+
+function createAttributeHandlePattern(handlers) {
+  var keys = _Object.keys(handlers).join('|');
+  return new RegExp('^(' + keys + ')(.*)');
+}
+
+var handledAttributesPattern = createAttributeHandlePattern(attributeHandlers);
 
 function store(component, state, abstract) {
 
@@ -218,12 +262,6 @@ function store(component, state, abstract) {
   }
 
   return dispatch(state);
-}
-
-var elementCache = {};
-function createElement(type, namespace) {
-
-	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
 }
 
 var pipes = {};
@@ -261,6 +299,12 @@ function distill(content, store, type, kind) {
   return pipe$$1 && flow ? distill(flow(content), store, type) : [content, type, kind];
 }
 
+var elementCache = {};
+function createElement(type, namespace) {
+
+	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
+}
+
 function renderContent(parent, content, abstract, store) {
 
   var createNode = !abstract.node || abstract.type;
@@ -273,42 +317,29 @@ function renderContent(parent, content, abstract, store) {
 
 function renderAttributes$1(node, content) {
   var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var namespace = arguments[3];
+
 
   for (var key in content) {
+
     var value = content[key];
-    if (value !== abstract[key]) setAttribute(node, key, value);
-  }
-  return content;
-}
-
-function setAttribute(node, key, value) {
-  var isDataAttribute = key.match(/^data([A-Z])(\w+)/);
-  if (isDataAttribute) {
-    var _key = isDataAttribute[1].toLowerCase() + isDataAttribute[2];
-    node.dataset[_key] = value;
-  } else node[key] = value;
-}
-
-function renderSVGAttributes(node, content) {
-  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-  for (var key in content) {
-    var value = content[key];
-    if (abstract[key] !== content[key]) {
-      /^xlink/.test(key) ? node.setAttributeNS(svgAttributeNameSpace, key, content[key]) : node.setAttribute(key, content[key]);
+    if (value !== abstract[key]) {
+      var match = key.match(handledAttributesPattern);
+      if (match) {
+        var _key = match[1];
+        attributeHandlers[_key](node, _key, value, match);
+      } else if (namespace) setAttribute(node, key, value);else node[key] = value;
     }
   }
+
   return content;
 }
 
-function renderElement(parent, template) {
-  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var store = arguments[3];
-  var namespace = arguments[4];
+function renderElement(parent, template, abstract, store, namespace) {
 
-
+  abstract = abstract || emptyObject;
   var type = abstract.node === parent ? _null : template[0];
-  if (type === 'svg') namespace = svgNameSpace;
+  namespace = namespace || namespaces[type];
 
   var createNode = type !== abstract.type;
   var node = createNode ? createElement(type, namespace) : abstract.node;
@@ -325,7 +356,7 @@ function renderElement(parent, template) {
         _type = _distill2[1],
         kind = _distill2[2];
 
-    var child = vdom[index] || {};
+    var child = vdom[index] || emptyObject;
 
     if (content === true) {
       
@@ -349,7 +380,7 @@ function renderElement(parent, template) {
   }
 
   // render element attributes
-  attributes = (namespace ? renderSVGAttributes : renderAttributes$1)(node, attributes, abstract.attributes);
+  attributes = renderAttributes$1(node, attributes, abstract.attributes, namespace);
 
   // add/remove children
   if (createNode) parent.appendChild(node);else while (index < vdom.length) {
@@ -359,13 +390,10 @@ function renderElement(parent, template) {
   }
   vdom.length = length;
 
-  // add/replace child elements
-
-
   return { node: node, type: type, vdom: vdom, attributes: attributes };
 }
 
-function render(node, template) {
+var render = function (node, template) {
   return function (store, abstract) {
     return renderElement(node, template, abstract || {
       node: node,
@@ -374,6 +402,17 @@ function render(node, template) {
       attributes: {}
     }, store);
   };
+};
+
+function compose() {
+  var base = slice(arguments);
+  return function () {
+    return base.concat(slice(arguments));
+  };
+}
+
+function element() {
+  return arguments;
 }
 
 var component = function () {
@@ -388,9 +427,11 @@ var component = function () {
 };
 
 var index = assign(component, {
-	renderString: renderString,
-	renderNumber: renderNumber,
-	renderAttributes: renderAttributes
+		compose: compose,
+		element: element,
+		renderString: renderString,
+		renderNumber: renderNumber,
+		renderAttributes: renderAttributes
 });
 
 return index;
