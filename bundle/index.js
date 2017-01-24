@@ -3,11 +3,13 @@ var x = (function () {
 'use strict';
 
 function pipe(methods) {
-	return function (value) {
-		return methods.reduce(function (value, callback) {
-			return callback(value);
-		}, value);
-	};
+  var length = methods.length;
+  var index = -1;
+  return function (value) {
+    while (++index < length) {
+      value = methods[index](value);
+    }return value;
+  };
 }
 
 function assign() {
@@ -26,62 +28,6 @@ function assign() {
 
 	return result;
 }
-
-var _document = document;
-var _Array = Array;
-var _Object = Object;
-
-var freeze = _Object.freeze;
-
-var _undefined = undefined;
-var _null = null;
-
-var functionType = 'function';
-var objectType = 'object';
-var stringType = 'string';
-var numberType = 'number';
-var nodeType = 'node';
-
-var svgNameSpace = 'http://www.w3.org/2000/svg';
-var svgAttributeNameSpace = 'http://www.w3.org/1999/xlink';
-var contentPattern = /^st|nu/;
-
-function store(component, state, abstract) {
-
-  var initialState = assign({}, state);
-
-  function dispatch(action) {
-
-    while (typeof action == 'function') {
-      action = action({ state: state, dispatch: dispatch });
-    }if (action === null) action = initialState;
-
-    if (action == '[object Object]') {
-      state = freeze(assign({}, state, action));
-      abstract = component({ dispatch: dispatch, state: state }, abstract);
-    } else if (action != null) {
-      console.warn("action is expected to be a function, plain Object, null, or undefined", action);
-    }
-
-    return dispatch;
-  }
-
-  return dispatch(state);
-}
-
-var pipes = {};
-
-var prepare = function prepare(key) {
-  return function () {
-    var methods = arguments;
-    var length = methods.length;
-    pipes[key] = length > 1 ? pipe(methods) : length ? methods[0] : _null;
-  };
-};
-
-var renderString = prepare(stringType);
-var renderNumber = prepare(numberType);
-var renderAttributes = prepare(objectType);
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -107,7 +53,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
 
+  return obj;
+};
 
 var get = function get(object, property, receiver) {
   if (object === null) object = Function.prototype;
@@ -210,11 +169,80 @@ var slicedToArray = function () {
   };
 }();
 
+var _contentTypes;
+
+var _document = document;
+
+var _Object = Object;
+
+var freeze = _Object.freeze;
+
+var _undefined = undefined;
+var _null = null;
+
+var functionType = 'function';
+var booleanType = 'boolean';
+var objectType = 'object';
+var stringType = 'string';
+var numberType = 'number';
+var nodeType = 'node';
+
+var svgNameSpace = 'http://www.w3.org/2000/svg';
+var svgAttributeNameSpace = 'http://www.w3.org/1999/xlink';
+
+var contentTypes = (_contentTypes = {}, defineProperty(_contentTypes, stringType, true), defineProperty(_contentTypes, numberType, true), _contentTypes);
+
+function store(component, state, abstract) {
+
+  var initialState = assign({}, state);
+
+  function dispatch(action) {
+
+    var start = performance.now();
+
+    while (typeof action == 'function') {
+      action = action({ state: state, dispatch: dispatch });
+    }if (action === null) action = initialState;
+
+    if (action == '[object Object]') {
+      state = freeze(assign({}, state, action));
+      abstract = component({ dispatch: dispatch, state: state }, abstract);
+    } else if (action != null) {
+      console.warn("action is expected to be a function, plain Object, null, or undefined", action);
+    }
+
+    var duration = Math.floor((performance.now() - start) * 100) / 100;
+    console.log('frame time: ' + duration + 'ms, ' + Math.floor(1000 / duration) + 'fps');
+
+    return dispatch;
+  }
+
+  return dispatch(state);
+}
+
+var elementCache = {};
+function createElement(type, namespace) {
+
+	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
+}
+
+var pipes = {};
+
+var prepare = function prepare(key) {
+  return function () {
+    var methods = arguments;
+    var length = methods.length;
+    pipes[key] = length > 1 ? pipe(methods) : length ? methods[0] : _null;
+  };
+};
+
+var renderString = prepare(stringType);
+var renderNumber = prepare(numberType);
+var renderAttributes = prepare(objectType);
+
 function distill(content, store, type, kind) {
 
   var pipe$$1 = type === _undefined;
-  if (content == _null) content = _null;
-
   type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   while (type == functionType) {
     content = content(store);
@@ -223,20 +251,14 @@ function distill(content, store, type, kind) {
 
   var flow = pipes[type];
 
-  if (content instanceof _Array) {
-    kind = content[0];
-    type = nodeType;
-  } else if (contentPattern.test(type)) {
-    type = nodeType;
+  if (type != booleanType) {
+    if (content == _null) content = _null;else if (contentTypes[type]) type = nodeType;else {
+      kind = content[0];
+      if ((typeof kind === 'undefined' ? 'undefined' : _typeof(kind)) == stringType) type = nodeType;
+    }
   }
 
   return pipe$$1 && flow ? distill(flow(content), store, type) : [content, type, kind];
-}
-
-var elementCache = {};
-function createElement(type, namespace) {
-
-	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
 }
 
 function renderContent(parent, content, abstract, store) {
@@ -249,30 +271,32 @@ function renderContent(parent, content, abstract, store) {
   return { node: node, content: content };
 }
 
-function renderAttributes$1(node, content, abstract) {
-  if (abstract) for (var key in content) {
+function renderAttributes$1(node, content) {
+  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+  for (var key in content) {
     var value = content[key];
-    if (!/^on/.test(key) && value !== abstract[key]) {
-      if (key === 'className') node.setAttribute('class', value);else node[key] = value;
-    }
-  } else for (var _key in content) {
-    setAttribute(node, _key, content[_key]);
+    if (value !== abstract[key]) setAttribute(node, key, value);
   }
   return content;
 }
 
 function setAttribute(node, key, value) {
-  if (key === 'className') node.setAttribute('class', value);else node[key] = value;
+  var isDataAttribute = key.match(/^data([A-Z])(\w+)/);
+  if (isDataAttribute) {
+    var _key = isDataAttribute[1].toLowerCase() + isDataAttribute[2];
+    node.dataset[_key] = value;
+  } else node[key] = value;
 }
 
-function renderSVGAttributes(node, content, abstract) {
-  if (abstract) for (var key in content) {
+function renderSVGAttributes(node, content) {
+  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+  for (var key in content) {
     var value = content[key];
     if (abstract[key] !== content[key]) {
       /^xlink/.test(key) ? node.setAttributeNS(svgAttributeNameSpace, key, content[key]) : node.setAttribute(key, content[key]);
     }
-  } else for (var _key2 in content) {
-    /^xlink/.test(_key2) ? node.setAttributeNS(svgAttributeNameSpace, _key2, content[_key2]) : node.setAttribute(_key2, content[_key2]);
   }
   return content;
 }
@@ -341,26 +365,14 @@ function renderElement(parent, template) {
   return { node: node, type: type, vdom: vdom, attributes: attributes };
 }
 
-function component$1(node, template, abstract, store) {
-
-  var start = performance.now();
-
-  abstract = renderElement(node, template, abstract || {
-    node: node,
-    type: null,
-    vdom: [],
-    attributes: {}
-  }, store);
-
-  var duration = Math.floor((performance.now() - start) * 100) / 100;
-  console.log('frame time: ' + duration + 'ms, ' + Math.floor(1000 / duration) + 'fps');
-
-  return abstract;
-}
-
-function render(root, template) {
+function render(node, template) {
   return function (store, abstract) {
-    return component$1(root, template, abstract, store);
+    return renderElement(node, template, abstract || {
+      node: node,
+      type: null,
+      vdom: [],
+      attributes: {}
+    }, store);
   };
 }
 
@@ -369,6 +381,7 @@ var component = function () {
   var template = arguments;
   return function (selector, state, abstract) {
     var root = _document.querySelector(selector);
+    root.innerHTML = "";
     var component = render(root, template);
     return store(component, state, abstract);
   };

@@ -58,11 +58,7 @@ const TableRow = events => ({ id, text, href, active }, index) => {
         [ 'a', { href, onclick: selectRow(id) }, text ]
     ],
     [ 'td', { className: 'action' },
-      [ 'button', { type: 'button', onclick: deleteRow(index) },
-        ['svg', { viewBox: "0 0 24 24" },
-          ['use', { 'xlink:href': "#i:remove" } ]
-        ]
-      ],
+      [ 'button', { type: 'button', onclick: deleteRow(index) }, "x"],
     ],
   ]
 
@@ -76,7 +72,7 @@ const Table = ({ state, dispatch }) => {
   const searchPattern = search && new RegExp(search, 'i')
   
   return [ 'section',
-    ['form',
+    ['form', { dataName: { name: "hello" } },
       [ 'button', { type: 'button', onclick: createNumberOfRows(1e3) }, 'Create 1.000 rows' ],
       [ 'button', { type: 'button', onclick: createNumberOfRows(1e4) }, 'Create 10.000 rows' ],
       [ 'button', { type: 'button', onclick: addNumberOfRows(1e3) }, 'Append 1.000 rows' ],

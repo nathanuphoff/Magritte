@@ -7,6 +7,7 @@ export default function() {
   const template = arguments
   return function(selector, state, abstract) {  
     const root = _document.querySelector(selector)
+    root.innerHTML = ""
     const component = render(root, template)
     return store(component, state, abstract)
   }

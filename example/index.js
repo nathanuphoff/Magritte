@@ -10,8 +10,12 @@ const state = {
 }
 
 // by uncommenting the rules below all element textContent will be in uppercase
-// const toUpperCase = value => value.toUpperCase()
+const toUpperCase = value => value.toUpperCase()
 // x.renderString(toUpperCase)
+
+const PageTitle = ({ state }) => state.title
+
+const renderTitle = x(PageTitle)('title', { title: "Hello Title" })
 
 const component = x(Table)
 
