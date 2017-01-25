@@ -30,3 +30,70 @@ export default function store(component, state, abstract) {
   return dispatch(state)
 
 }
+
+//
+
+const contentTypes = {
+  string: true,
+  number: true,
+  object: true,
+  list: true,
+  undefined: true,
+}
+
+const dispatch = defineStructure({ 
+  meta: {
+    title: "Define structure",
+  },
+  list: [], 
+  name: "Nathan" 
+})
+
+dispatch.name("Hans")
+dispatch.list([1, 2, 3])
+
+console.log('last', dispatch.list.last)
+console.log('next', dispatch.list.next)
+
+dispatch.list.changed()
+
+function defineStructure(value) {
+
+  const type = typeof value
+  let structure = {
+    next: value,
+    last: null,
+    changed(deep) {
+      return structure.next !== structure.last 
+    },
+    type,
+  }
+
+  function update(next) {
+    structure.last = structure.next
+    structure.next = next
+  }
+
+  if (type != 'string' && value == '[object Object]') {
+    const props = {}
+    for (const key in value) props[key] = defineStructure(value[key])
+    structure = props
+  }
+  else {
+    if (Array.isArray(value)) {
+      structure.type = 'list'
+      structure = assign(update, structure)
+    }
+    else if (contentTypes[type]) structure = assign(update, structure)
+    else structure = console.warn("invalid state value supplied:", value)
+  }
+  
+  return structure
+
+}
+
+
+
+
+
+
