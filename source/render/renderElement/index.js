@@ -1,6 +1,5 @@
-import { _null, nodeType, objectType, assign, namespaces, emptyObject } from '../../_'
-import { distill } from '../../content'
-
+import { _null, listType, objectType, contentTypes, assign, namespaces, emptyObject } from '../../_'
+import { transformChild } from '../../middleware'
 import { createElement } from '../createElement'
 import { renderContent } from '../renderContent'
 import { renderAttributes } from '../renderAttributes'
@@ -17,17 +16,21 @@ export function renderElement(parent, template, abstract, store, namespace) {
   const vdom = createNode ? [type] : abstract.vdom
   let attributes = {}
   
+  // render element child content
   const length = template.length
   let index = !!type - 1
   while (++index < length) {
 
-    let [content, type, kind] = distill(template[index], store)
+    let [content, type, kind] = transformChild(template[index], store)
     const child = vdom[index] || emptyObject
 
-    if (content === true) [content, type, kind] = distill(child.vdom)
+    if (content === true) [content, type, kind] = transformChild(child.vdom)
     
-    if (type == nodeType) {
-      vdom[index] = (kind ? renderElement : renderContent)(node, content, child, store, namespace)
+    if (contentTypes[type]) {
+      vdom[index] = renderContent(node, content, child, store)
+    }
+    else if (type == listType) {
+      vdom[index] = renderElement(node, content, child, store, namespace)
     }
     else if (type == objectType) {
       vdom[index] = _null

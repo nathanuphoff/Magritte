@@ -1,0 +1,1 @@
+export const _Object = Object

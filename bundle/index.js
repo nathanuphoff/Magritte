@@ -2,15 +2,7 @@ document.write('<script src="http://' + (location.host || 'localhost').split(':'
 var x = (function () {
 'use strict';
 
-function pipe(methods) {
-  var length = methods.length;
-  var index = -1;
-  return function (value) {
-    while (++index < length) {
-      value = methods[index](value);
-    }return value;
-  };
-}
+var _Object = Object;
 
 function assign() {
 
@@ -29,9 +21,30 @@ function assign() {
 	return result;
 }
 
+function createPropertyHandlers(defaultPattern) {
+
+  var cache = {
+    methods: {},
+    pattern: defaultPattern
+  };
+
+  return function (object) {
+    var methods = assign(cache.methods, object);
+    var keys = Object.keys(methods).join('|');
+    var pattern = keys ? new RegExp('^(' + keys + ')(.*)') : defaultPattern;
+    return assign(cache, { methods: methods, pattern: pattern });
+  };
+}
+
 function slice(value) {
   return [].slice.call(value, 0);
 }
+
+function toLowerCase(value) {
+  return value.toLowerCase(value);
+}
+
+var freeze = _Object.freeze;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -177,64 +190,43 @@ var _contentTypes;
 
 var _document = document;
 
-var _Object = Object;
-
-
-
-var freeze = _Object.freeze;
-
-var _undefined = undefined;
-var _null = null;
 
 var emptyObject = {};
+
+var _null = null;
 
 var functionType = 'function';
 var booleanType = 'boolean';
 var objectType = 'object';
 var stringType = 'string';
 var numberType = 'number';
-var nodeType = 'node';
+var listType = 'list';
 
-var svgAttributeNameSpace = 'http://www.w3.org/1999/xlink';
-
-var contentTypes = (_contentTypes = {}, defineProperty(_contentTypes, stringType, true), defineProperty(_contentTypes, numberType, true), _contentTypes);
+var contentTypes = (_contentTypes = {}, defineProperty(_contentTypes, stringType, 1), defineProperty(_contentTypes, numberType, 1), _contentTypes);
 
 var namespaces = {
   svg: 'http://www.w3.org/2000/svg'
 };
 
-function setAttribute(node, key, value) {
-  if (value == _null || value === false) node.removeAttribute(key);else {
-    if (value === true) value = '';
-    node.setAttribute(key, value);
-  }
+var attribute = createPropertyHandlers(/(?!)/);
+
+function compose() {
+  var base = slice(arguments);
+  return function () {
+    return base.concat(slice(arguments));
+  };
 }
 
-var attributeHandlers = {
-  data: function data(node, key, value, match) {
-    var tail = match[2];
-    key = tail[0].toLowerCase() + tail.substr(1);
-    node.dataset[key] = value;
-  },
-  xlink: function xlink(node, key, value, match) {
-    node.setAttributeNS(svgAttributeNameSpace, 'xlink:href', value);
-  },
-
-
-  viewBox: setAttribute,
-
-  aria: function aria(node, key, value, match) {
-    key = match[0].replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-    setAttribute(node, key, value);
-  }
-};
-
-function createAttributeHandlePattern(handlers) {
-  var keys = _Object.keys(handlers).join('|');
-  return new RegExp('^(' + keys + ')(.*)');
+function element() {
+  return arguments;
 }
 
-var handledAttributesPattern = createAttributeHandlePattern(attributeHandlers);
+function route() {
+  var parameters = arguments;
+  return function (template) {
+    return template;
+  };
+}
 
 function store(component, state, abstract) {
 
@@ -246,17 +238,17 @@ function store(component, state, abstract) {
 
     while (typeof action == 'function') {
       action = action({ state: state, dispatch: dispatch });
-    }if (action === null) action = initialState;
+    }if (action === _null) action = initialState;
 
     if (action == '[object Object]') {
       state = freeze(assign({}, state, action));
       abstract = component({ dispatch: dispatch, state: state }, abstract);
-    } else if (action != null) {
+    } else if (action != _null) {
       console.warn("action is expected to be a function, plain Object, null, or undefined", action);
     }
 
     var duration = Math.floor((performance.now() - start) * 100) / 100;
-    console.log('frame time: ' + duration + 'ms, ' + Math.floor(1000 / duration) + 'fps');
+    console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps');
 
     return dispatch;
   }
@@ -264,40 +256,61 @@ function store(component, state, abstract) {
   return dispatch(state);
 }
 
-var pipes = {};
+function transformChild(content, store, type, kind) {
 
-var prepare = function prepare(key) {
-  return function () {
-    var methods = arguments;
-    var length = methods.length;
-    pipes[key] = length > 1 ? pipe(methods) : length ? methods[0] : _null;
-  };
-};
-
-var renderString = prepare(stringType);
-var renderNumber = prepare(numberType);
-var renderAttributes = prepare(objectType);
-
-function distill(content, store, type, kind) {
-
-  var pipe$$1 = type === _undefined;
+  // const pipe = type === _undefined
   type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   while (type == functionType) {
     content = content(store);
     type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   }
 
-  var flow = pipes[type];
+  // const flow = pipes[type]
 
   if (type != booleanType) {
-    if (content == _null) content = _null;else if (contentTypes[type]) type = nodeType;else {
-      kind = content[0];
-      if ((typeof kind === 'undefined' ? 'undefined' : _typeof(kind)) == stringType) type = nodeType;
-    }
+    if (content == _null) content = _null;else if (!contentTypes[type] && _typeof(content[0]) == stringType) type = listType;
   }
 
-  return pipe$$1 && flow ? distill(flow(content), store, type) : [content, type, kind];
+  return [content, type, kind];
+  // return pipe && flow
+  //   ? distill(flow(content), store, type)
+  //   : [content, type, kind]
 }
+
+function setAttribute(node, key, value, namespace) {
+  if (value == _null || value === false) {
+    namespace ? node.removeAttributeNS(namespace, key) : node.removeAttribute(key);
+  } else {
+    if (value === true) value = '';
+    namespace ? node.setAttributeNS(namespace, key, value) : node.setAttribute(key, value);
+  }
+}
+
+var attributeHandlers = attribute({
+  data: function data(node, key, value, _ref) {
+    var _ref2 = slicedToArray(_ref, 2),
+        head = _ref2[0],
+        tail = _ref2[1];
+
+    key = toLowerCase(tail[0]) + tail.substr(1);
+    node.dataset[key] = value;
+  },
+  xlink: function xlink(node, key, value, _ref3) {
+    var _ref4 = slicedToArray(_ref3, 2),
+        head = _ref4[0],
+        tail = _ref4[1];
+
+    key = head + ':' + toLowerCase(tail);
+    setAttribute(node, key, value, 'http://www.w3.org/1999/xlink');
+  },
+  viewBox: function viewBox(node, key, value) {
+    setAttribute(node, key, value);
+  },
+  aria: function aria(node, key, value) {
+    key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1-$2'));
+    setAttribute(node, key, value);
+  }
+});
 
 var elementCache = {};
 function createElement(type, namespace) {
@@ -315,19 +328,21 @@ function renderContent(parent, content, abstract, store) {
   return { node: node, content: content };
 }
 
-function renderAttributes$1(node, content) {
-  var abstract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var namespace = arguments[3];
+function renderAttributes(node, content, abstract, namespace) {
 
-
+  abstract = abstract || emptyObject;
   for (var key in content) {
 
     var value = content[key];
     if (value !== abstract[key]) {
-      var match = key.match(handledAttributesPattern);
+      var match = key.match(attributeHandlers.pattern);
       if (match) {
-        var _key = match[1];
-        attributeHandlers[_key](node, _key, value, match);
+        var _match = slicedToArray(match, 3),
+            _key = _match[0],
+            head = _match[1],
+            tail = _match[2];
+
+        attributeHandlers.methods[head](node, _key, value, [head, tail]);
       } else if (namespace) setAttribute(node, key, value);else node[key] = value;
     }
   }
@@ -347,29 +362,32 @@ function renderElement(parent, template, abstract, store, namespace) {
   var vdom = createNode ? [type] : abstract.vdom;
   var attributes = {};
 
+  // render element child content
   var length = template.length;
   var index = !!type - 1;
   while (++index < length) {
-    var _distill = distill(template[index], store),
-        _distill2 = slicedToArray(_distill, 3),
-        content = _distill2[0],
-        _type = _distill2[1],
-        kind = _distill2[2];
+    var _transformChild = transformChild(template[index], store),
+        _transformChild2 = slicedToArray(_transformChild, 3),
+        content = _transformChild2[0],
+        _type = _transformChild2[1],
+        kind = _transformChild2[2];
 
     var child = vdom[index] || emptyObject;
 
     if (content === true) {
       
 
-      var _distill3 = distill(child.vdom);
+      var _transformChild3 = transformChild(child.vdom);
 
-      var _distill4 = slicedToArray(_distill3, 3);
+      var _transformChild4 = slicedToArray(_transformChild3, 3);
 
-      content = _distill4[0];
-      _type = _distill4[1];
-      kind = _distill4[2];
-    }if (_type == nodeType) {
-      vdom[index] = (kind ? renderElement : renderContent)(node, content, child, store, namespace);
+      content = _transformChild4[0];
+      _type = _transformChild4[1];
+      kind = _transformChild4[2];
+    }if (contentTypes[_type]) {
+      vdom[index] = renderContent(node, content, child, store);
+    } else if (_type == listType) {
+      vdom[index] = renderElement(node, content, child, store, namespace);
     } else if (_type == objectType) {
       vdom[index] = _null;
       if (content == _null) {
@@ -380,7 +398,7 @@ function renderElement(parent, template, abstract, store, namespace) {
   }
 
   // render element attributes
-  attributes = renderAttributes$1(node, attributes, abstract.attributes, namespace);
+  attributes = renderAttributes(node, attributes, abstract.attributes, namespace);
 
   // add/remove children
   if (createNode) parent.appendChild(node);else while (index < vdom.length) {
@@ -404,18 +422,7 @@ var render = function (node, template) {
   };
 };
 
-function compose() {
-  var base = slice(arguments);
-  return function () {
-    return base.concat(slice(arguments));
-  };
-}
-
-function element() {
-  return arguments;
-}
-
-var component = function () {
+function factory() {
 
   var template = arguments;
   return function (selector, state, abstract) {
@@ -424,14 +431,13 @@ var component = function () {
     var component = render(root, template);
     return store(component, state, abstract);
   };
-};
+}
 
-var index = assign(component, {
-		compose: compose,
-		element: element,
-		renderString: renderString,
-		renderNumber: renderNumber,
-		renderAttributes: renderAttributes
+var index = assign(factory, {
+  attribute: attribute,
+  compose: compose,
+  element: element,
+  route: route
 });
 
 return index;

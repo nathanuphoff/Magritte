@@ -1,11 +1,23 @@
-import { assign } from './_'
-import component, { compose, element, route } from './component'
-import { renderString, renderNumber, renderAttributes } from './content'
+import { _document, assign } from './_'
+import { attribute, compose, element, route } from './component'
+import store from './store'
+import render from './render'
 
-export default assign(component, {
+function factory() {
+
+  const template = arguments
+  return function(selector, state, abstract) {  
+    const root = _document.querySelector(selector)
+    root.innerHTML = ""
+    const component = render(root, template)
+    return store(component, state, abstract)
+  }
+
+}
+
+export default assign(factory, {
+  attribute,
   compose,
   element,
-	renderString, 
-	renderNumber,
-	renderAttributes,
+  route,
 })

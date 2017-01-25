@@ -1,15 +1,18 @@
-import { setAttribute, handledAttributesPattern, attributeHandlers, svgAttributeNameSpace, _null } from '../../_'
+import { _null, emptyObject } from '../../_'
+import { attributeHandlers } from '../../middleware'
+import { setAttribute } from '../../document'
 
-export function renderAttributes(node, content, abstract = {}, namespace) {
+export function renderAttributes(node, content, abstract, namespace) {
   
+  abstract = abstract || emptyObject
   for (const key in content) {
     
     const value = content[key]
     if (value !== abstract[key]) {
-      const match = key.match(handledAttributesPattern)
+      const match = key.match(attributeHandlers.pattern)
       if (match) {
-        const key = match[1]
-        attributeHandlers[key](node, key, value, match) 
+        const [key, head, tail] = match
+        attributeHandlers.methods[head](node, key, value, [head, tail]) 
       }
       else if (namespace) setAttribute(node, key, value)
       else node[key] = value

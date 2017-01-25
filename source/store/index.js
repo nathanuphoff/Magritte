@@ -1,4 +1,4 @@
-import { assign, freeze, lastState } from '../_'
+import { assign, freeze, _null } from '../_'
 
 export default function store(component, state, abstract) {
   
@@ -10,19 +10,19 @@ export default function store(component, state, abstract) {
 
     while (typeof action == 'function') action = action({ state, dispatch })
 
-    if (action === null) action = initialState
+    if (action === _null) action = initialState
 
     if (action == '[object Object]') {
-      state = freeze(assign({}, state, action))
+      state = freeze(assign({}, state, action))      
       abstract = component({ dispatch, state }, abstract)
     }
-    else if (action != null) {
+    else if (action != _null) {
     	console.warn("action is expected to be a function, plain Object, null, or undefined", action)
     }
 
     const duration = Math.floor((performance.now() - start) * 100) / 100
-    console.log('frame time: ' + duration + 'ms, ' + Math.floor(1000 / duration) + 'fps')
-   
+    console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
+
     return dispatch
 
   }
