@@ -12,34 +12,51 @@ const TableEvents = ({ dispatch, state }) => ({
   deleteRow: index => event => {
     const table = removeAtIndex(index)(state.table)
     dispatch({ table })
+
+    // dispatch.table(removeAtIndex(index))
   },
 
   updateNthRow: n => event => {
-    const table = map((item, index) => {
+
+    function updateNthItem(item, index) {
       if (index % n < 1) item.text += '!'
       return item
-    })(state.table)
+    }
+
+    const table = map(updateNthItem)(state.table)
     if (table.length) dispatch({ table })
+
+    // if (state.table.length) dispatch.table(map(updateNthItem))
   },
 
   selectRow: id => event => {
     event.preventDefault()
-    if (id != state.selected) dispatch({ selected: id })
+    if (id !== state.selected) dispatch({ selected: id })
+
+    // if (id !== state.selected) dispatch.selected(id)
   },
 
   deleteAll: event => {
     const { table } = state
     if (table.length) dispatch({ table: [] })
+
+    // if (state.table.length) dispatch.table([])
   },
 
   createNumberOfRows: amount => event => {
     const table = createTableRows(amount)
     dispatch({ table })
+
+    // dispatch.table(createTableRows(amount))
   },
 
   addNumberOfRows: amount => event => {
     const table = state.table.concat(createTableRows(amount))
     dispatch({ table })
+
+    // in this example ‘concat’ is expected to be defined elsewhere
+    // const concat = data => array => array.concat(data)
+    // dispatch.table(concat(data))
   },
 
   swapRows: event => {
@@ -50,11 +67,23 @@ const TableEvents = ({ dispatch, state }) => ({
       table[8] = a
       dispatch({ table })
     }
+
+    // the above would require a deep compare to attest wheter a change was made (bad)
+    // let’s refactore:
+    // const swapArrayValues = (a, b) => array => {
+    //   const result = array.slice()
+    //   result[a] = array[b]
+    //   result[b] = array[a]
+    //   return result
+    // }
+    // 
+    //  dispatch.table(swapArrayValues(4, 8)) 
+    // now a new array is dispatched which allows for referential comparison
+
   },
 
 })
 
-let a = 0
 const Table = ({ state, dispatch }) => {
 
   const { table, selected } = state
@@ -93,7 +122,7 @@ const TableRow = (events, selected, a) => ({ id, text, href, active }, index) =>
   const { selectRow, deleteRow } = events
   const className = selected === id ? 'active' : ''
 
-  const y = a % 2 < 1 && [ 'tr', { className, key: id },
+  return [ 'tr', { className, key: id },
       [ 'td', { className: 'id' }, id ], 
       [ 'td', { className: 'item' },
           [ 'a', { href, onclick: selectRow(id) }, text ]
@@ -103,9 +132,6 @@ const TableRow = (events, selected, a) => ({ id, text, href, active }, index) =>
       ],
       [ 'td', { className: 'action' }],
     ]
-
-  // console.log('template', y)
-  return y
 
 }
 
