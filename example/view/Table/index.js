@@ -107,7 +107,7 @@ const Table = ({ state, dispatch }) => {
       ],
     ],
     [ 'table', { className: 'table' },
-      [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected, ++a))(table)]
+      [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)]
     ]
   ]
 
@@ -117,7 +117,7 @@ const removeLabel = testSVG
   ? ['svg', { viewBox: '0 0 24 24', stroke: "red", strokeWidth: 2 }, ['use', { xlinkHref: '#i:remove' }]]
   : "x"
 
-const TableRow = (events, selected, a) => ({ id, text, href, active }, index) => {
+const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
 
   const { selectRow, deleteRow } = events
   const className = selected === id ? 'active' : ''
