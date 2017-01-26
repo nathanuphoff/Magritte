@@ -1,19 +1,17 @@
 'use strict'
+const { compose } = x
 
-const PageHeader = x.compose('header', { className: 'page', ariaRole: "Title" })
+const PageHeader = compose('header', { className: 'page', ariaRole: "Title" })
 
-const TitleEvents = ({ model }) => ({
+let i = 0
+let count = 0
+
+const TitleEvents = ({ model, state }) => ({
 	onclick(event) {
-		model.title("Let’s do this!")
-		// console.log('changed title', model.title.changed(), model.title.next)
-		// console.log('changed table', model.table.changed())
-		
-		// console.log('model', model)
-		
-		dispatch({ title: "Something something" })
+		console.log(model)
 	},
 })
 
-const Title = ({ state }) => {
-	return PageHeader(['h1', TitleEvents, state.title])
+const Title = ({ state, model }) => {
+	return PageHeader(['h1', TitleEvents, model.title.next])
 }

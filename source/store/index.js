@@ -4,6 +4,7 @@ export default function store(component, state, abstract) {
   
   const initialState = assign({}, state)
   const model = defineStructure(state)
+  const nextState = structureToState(model, 'next')
 
   function dispatch(action) {
 
@@ -22,7 +23,7 @@ export default function store(component, state, abstract) {
     }
 
     const duration = Math.floor((performance.now() - start) * 100) / 100
-    console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
+    // console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
 
     return dispatch
 
@@ -34,11 +35,6 @@ export default function store(component, state, abstract) {
 
 //
 
-function assignPrimitive(value) {
-  console.log('test', value)
-  return value
-}
-
 const primitiveTypes = {
   string: true,
   number: true,
@@ -49,47 +45,63 @@ const isArray = Array.isArray
 
 const testContent = {
   Array: isArray,
-  content: isPrimitiveValue
+  primitive: isPrimitive
 }
 
-let timestamp
-function defineStructure(value, path) {
+function structureToState(structure, cycle) {
+  const state = {}
+  for (const key in structure) {
+    const value = structure[key]
+    state[key] = typeof value == 'function'
+      ? value[cycle]
+      : structureToState(value, cycle)
+  }
+  return freeze(state)
+}
+
+
+function defineStructure(value, host, path) {
   
-  
+  let time = Date.now()
+  const structure = {}
+
   if (isPlainObject(value)) {
-    const model = {}
-    for (const key in value) model[key] = defineStructure(value[key], key)
-    return model
+    for (const key in value) {
+      const location = path ? path + '.' + key : key
+      structure[key] = defineStructure(value[key], structure, location)
+    }
+    return structure
   }
   else {
     
-    let type = typeof value
-    const structure = {
-      value,
-      path,
-      time: Date.now(),
-      changed() {
-        console.log('get changed', value)
-        return structure.time === timestamp && value !== structure.value 
-      },
-    }
-
-    const isPrimitiveValue = isPritiveValue(value)
+    const isPrimitiveValue = isPrimitive(value)
     if (isPrimitiveValue || isArray(value)) {
       
-      type = isPrimitiveValue ? 'content' : 'Array'
+      const type = isPrimitiveValue ? 'primitive' : 'Array'
+      const next = value
       
-      function push(update) {
-        timestamp = Date.now()
-        structure.time = timestamp        
-        structure.value = value
-        value = update
+      assign(structure, { next, time, path, type, changed })
+
+      function changed(deep) {
+        return time !== structure.time && structure.last !== structure.next
       }
       
-      return assign(push, structure, { type })
+      function dispatch(next) {
+        const last = structure.next
+        if (testContent[type](next)) {
+          if (last !== next) {
+            const object = host[path]            
+            assign(object, { next, last, time: Date.now() })
+            assign(structure, object)
+          }
+        }
+        else console.warn("The ‘next’ value  provided to dispatch." + path + "() is of the wrong type: ", { last, next })
+      }
+      
+      return assign(dispatch, structure)
       
     }
-    else console.warn("state value is not valid:", value)
+    else console.warn("state value is not valid, expected a" + type, value)
     
   }
   
@@ -99,7 +111,7 @@ function isPlainObject(value) {
   return typeof value != 'string' && value == '[object Object]'
 }
 
-function isPritiveValue(value) {
+function isPrimitive(value) {
   return value == null || primitiveTypes[typeof value]
 }
 

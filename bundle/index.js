@@ -232,6 +232,7 @@ function store(component, state, abstract) {
 
   var initialState = assign({}, state);
   var model = defineStructure(state);
+  var nextState = structureToState(model, 'next');
 
   function dispatch(action) {
 
@@ -249,13 +250,15 @@ function store(component, state, abstract) {
     }
 
     var duration = Math.floor((performance.now() - start) * 100) / 100;
-    console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps');
+    // console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
 
     return dispatch;
   }
 
   return dispatch(state);
 }
+
+//
 
 var primitiveTypes = {
   string: true,
@@ -265,46 +268,63 @@ var primitiveTypes = {
 
 var isArray = Array.isArray;
 
-var timestamp = void 0;
-function defineStructure(value, path) {
+var testContent = {
+  Array: isArray,
+  primitive: isPrimitive
+};
+
+function structureToState(structure, cycle) {
+  var state = {};
+  for (var key in structure) {
+    var value = structure[key];
+    state[key] = typeof value == 'function' ? value[cycle] : structureToState(value, cycle);
+  }
+  return freeze(state);
+}
+
+function defineStructure(value, host, path) {
+
+  var time = Date.now();
+  var structure = {};
 
   if (isPlainObject(value)) {
-    var model = {};
     for (var key in value) {
-      model[key] = defineStructure(value[key], key);
-    }return model;
+      var location = path ? path + '.' + key : key;
+      structure[key] = defineStructure(value[key], structure, location);
+    }
+    return structure;
   } else {
-    var _ret = function () {
 
-      var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-      var structure = {
-        value: value,
-        path: path,
-        time: Date.now(),
-        changed: function changed() {
-          console.log('get changed', value);
-          return structure.time === timestamp && value !== structure.value;
-        }
-      };
-
-      var isPrimitiveValue = isPritiveValue(value);
-      if (isPrimitiveValue || isArray(value)) {
-        var push = function push(update) {
-          timestamp = Date.now();
-          structure.time = timestamp;
-          structure.value = value;
-          value = update;
+    var isPrimitiveValue = isPrimitive(value);
+    if (isPrimitiveValue || isArray(value)) {
+      var _ret = function () {
+        var changed = function changed(deep) {
+          return time !== structure.time && structure.last !== structure.next;
         };
 
-        type = isPrimitiveValue ? 'content' : 'Array';
+        var dispatch = function dispatch(next) {
+          var last = structure.next;
+          if (testContent[type](next)) {
+            if (last !== next) {
+              var object = host[path];
+              assign(object, { next: next, last: last, time: Date.now() });
+              assign(structure, object);
+            }
+          } else console.warn("The ‘next’ value  provided to dispatch." + path + "() is of the wrong type: ", { last: last, next: next });
+        };
+
+        var type = isPrimitiveValue ? 'primitive' : 'Array';
+        var next = value;
+
+        assign(structure, { next: next, time: time, path: path, type: type, changed: changed });
 
         return {
-          v: assign(push, structure, { type: type })
+          v: assign(dispatch, structure)
         };
-      } else console.warn("state value is not valid:", value);
-    }();
+      }();
 
-    if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+    } else console.warn("state value is not valid, expected a" + type, value);
   }
 }
 
@@ -312,7 +332,7 @@ function isPlainObject(value) {
   return typeof value != 'string' && value == '[object Object]';
 }
 
-function isPritiveValue(value) {
+function isPrimitive(value) {
   return value == null || primitiveTypes[typeof value === 'undefined' ? 'undefined' : _typeof(value)];
 }
 
