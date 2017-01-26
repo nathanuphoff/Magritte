@@ -9,6 +9,6 @@
 const { createTableRows, removeAtIndex } = controller
 const { state } = model
 
-const render = x(Table)
+const render = x(Title, Table)
 
 const dispatch = render('#root', state)

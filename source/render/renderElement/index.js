@@ -51,7 +51,7 @@ export function renderElement(parent, template, abstract, store, namespace) {
   if (createNode) parent.appendChild(node)
   else while (index < vdom.length) {
     const child = vdom[index]
-    if (child) node.removeChild(child.node)
+    if (child.node) node.removeChild(child.node)
     index++
   }
   vdom.length = length   

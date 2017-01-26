@@ -231,18 +231,19 @@ function route() {
 function store(component, state, abstract) {
 
   var initialState = assign({}, state);
+  var model = defineStructure(state);
 
   function dispatch(action) {
 
     var start = performance.now();
 
     while (typeof action == 'function') {
-      action = action({ state: state, dispatch: dispatch });
+      action = action({ state: state, model: model, dispatch: dispatch });
     }if (action === _null) action = initialState;
 
     if (action == '[object Object]') {
       state = freeze(assign({}, state, action));
-      abstract = component({ dispatch: dispatch, state: state }, abstract);
+      abstract = component({ state: state, model: model, dispatch: dispatch }, abstract);
     } else if (action != _null) {
       console.warn("action is expected to be a function, plain Object, null, or undefined", action);
     }
@@ -256,63 +257,63 @@ function store(component, state, abstract) {
   return dispatch(state);
 }
 
-//
-
-var contentTypes$1 = {
+var primitiveTypes = {
   string: true,
   number: true,
-  object: true,
-  list: true,
-  undefined: true
+  boolean: true
 };
 
-var dispatch = defineStructure({
-  meta: {
-    title: "Define structure"
-  },
-  list: [],
-  name: "Nathan"
-});
+var isArray = Array.isArray;
 
-dispatch.name("Hans");
-dispatch.list([1, 2, 3]);
+var timestamp = void 0;
+function defineStructure(value, path) {
 
-console.log('last', dispatch.list.last);
-console.log('next', dispatch.list.next);
-
-dispatch.list.changed();
-
-function defineStructure(value) {
-
-  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  var structure = {
-    next: value,
-    last: null,
-    changed: function changed(deep) {
-      return structure.next !== structure.last;
-    },
-
-    type: type
-  };
-
-  function update(next) {
-    structure.last = structure.next;
-    structure.next = next;
-  }
-
-  if (type != 'string' && value == '[object Object]') {
-    var props = {};
+  if (isPlainObject(value)) {
+    var model = {};
     for (var key in value) {
-      props[key] = defineStructure(value[key]);
-    }structure = props;
+      model[key] = defineStructure(value[key], key);
+    }return model;
   } else {
-    if (Array.isArray(value)) {
-      structure.type = 'list';
-      structure = assign(update, structure);
-    } else if (contentTypes$1[type]) structure = assign(update, structure);else structure = console.warn("invalid state value supplied:", value);
-  }
+    var _ret = function () {
 
-  return structure;
+      var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+      var structure = {
+        value: value,
+        path: path,
+        time: Date.now(),
+        changed: function changed() {
+          console.log('get changed', value);
+          return structure.time === timestamp && value !== structure.value;
+        }
+      };
+
+      var isPrimitiveValue = isPritiveValue(value);
+      if (isPrimitiveValue || isArray(value)) {
+        var push = function push(update) {
+          timestamp = Date.now();
+          structure.time = timestamp;
+          structure.value = value;
+          value = update;
+        };
+
+        type = isPrimitiveValue ? 'content' : 'Array';
+
+        return {
+          v: assign(push, structure, { type: type })
+        };
+      } else console.warn("state value is not valid:", value);
+    }();
+
+    if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+  }
+}
+
+function isPlainObject(value) {
+  return typeof value != 'string' && value == '[object Object]';
+}
+
+function isPritiveValue(value) {
+  return value == null || primitiveTypes[typeof value === 'undefined' ? 'undefined' : _typeof(value)];
 }
 
 function transformChild(content, store, type, kind) {
@@ -462,7 +463,7 @@ function renderElement(parent, template, abstract, store, namespace) {
   // add/remove children
   if (createNode) parent.appendChild(node);else while (index < vdom.length) {
     var _child = vdom[index];
-    if (_child) node.removeChild(_child.node);
+    if (_child.node) node.removeChild(_child.node);
     index++;
   }
   vdom.length = length;
