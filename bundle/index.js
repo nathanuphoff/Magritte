@@ -2,50 +2,6 @@ document.write('<script src="http://' + (location.host || 'localhost').split(':'
 var x = (function () {
 'use strict';
 
-var _Object = Object;
-
-function assign() {
-
-	var data = arguments;
-	var result = data[0];
-	var length = data.length;
-	var index = 0;
-
-	while (++index < length) {
-		var object = data[index];
-		for (var key in object) {
-			result[key] = object[key];
-		}
-	}
-
-	return result;
-}
-
-function createPropertyHandlers(defaultPattern) {
-
-  var cache = {
-    methods: {},
-    pattern: defaultPattern
-  };
-
-  return function (object) {
-    var methods = assign(cache.methods, object);
-    var keys = Object.keys(methods).join('|');
-    var pattern = keys ? new RegExp('^(' + keys + ')(.*)') : defaultPattern;
-    return assign(cache, { methods: methods, pattern: pattern });
-  };
-}
-
-function slice(value) {
-  return [].slice.call(value, 0);
-}
-
-function toLowerCase(value) {
-  return value.toLowerCase(value);
-}
-
-var freeze = _Object.freeze;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -188,12 +144,10 @@ var slicedToArray = function () {
 
 var _contentTypes;
 
+var _Object = Object;
+var _Array = Array;
 var _document = document;
-
-
-var emptyObject = {};
-
-var _null = null;
+var _isNaN = isNaN;
 
 var functionType = 'function';
 var booleanType = 'boolean';
@@ -202,11 +156,75 @@ var stringType = 'string';
 var numberType = 'number';
 var listType = 'list';
 
+var _undefined = undefined;
+var _null = null;
+
+
+
+var emptyObject = {};
 var contentTypes = (_contentTypes = {}, defineProperty(_contentTypes, stringType, 1), defineProperty(_contentTypes, numberType, 1), _contentTypes);
 
 var namespaces = {
   svg: 'http://www.w3.org/2000/svg'
 };
+
+function assign() {
+
+	var data = arguments;
+	var result = data[0];
+	var length = data.length;
+	var index = 0;
+
+	while (++index < length) {
+		var object = data[index];
+		for (var key in object) {
+			result[key] = object[key];
+		}
+	}
+
+	return result;
+}
+
+function createPropertyHandlers(defaultPattern) {
+
+  var cache = {
+    methods: {},
+    pattern: defaultPattern
+  };
+
+  return function (object) {
+    var methods = assign(cache.methods, object);
+    var keys = Object.keys(methods).join('|');
+    var pattern = keys ? new RegExp('^(' + keys + ')(.*)') : defaultPattern;
+    return assign(cache, { methods: methods, pattern: pattern });
+  };
+}
+
+var freeze = _Object.freeze;
+
+function isArray(value) {
+  return _Array.isArray(value);
+}
+
+function isBoolean(value) {
+  return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == booleanType;
+}
+
+function isContent(value) {
+  return value === _null || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == stringType || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == numberType && !_isNaN(value);
+}
+
+function isPlainObject(value) {
+  return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) != stringType && value == '[object Object]';
+}
+
+function slice(value) {
+  return [].slice.call(value, 0);
+}
+
+function toLowerCase(value) {
+  return value.toLowerCase(value);
+}
 
 var attribute = createPropertyHandlers(/(?!)/);
 
@@ -228,112 +246,154 @@ function route() {
   };
 }
 
-function store(component, state, abstract) {
+// export default function store(component, state, abstract) {
 
-  var initialState = assign({}, state);
-  var model = defineStructure(state);
-  var nextState = structureToState(model, 'next');
+//   const initialState = assign({}, state)
+//   function dispatch(action) {
 
-  function dispatch(action) {
+//     const start = performance.now()
 
-    var start = performance.now();
+//     while (typeof action == functionType) action = action({ state, dispatch })
 
-    while (typeof action == 'function') {
-      action = action({ state: state, model: model, dispatch: dispatch });
-    }if (action === _null) action = initialState;
+//     if (action === _null) action = initialState
 
-    if (action == '[object Object]') {
-      state = freeze(assign({}, state, action));
-      abstract = component({ state: state, model: model, dispatch: dispatch }, abstract);
-    } else if (action != _null) {
-      console.warn("action is expected to be a function, plain Object, null, or undefined", action);
-    }
+//     if (action == '[object Object]') {
+//       state = freeze(assign({}, state, action))      
+//       abstract = component({ state, dispatch }, abstract)
+//     }
+//     else if (action != _null) {
+//       console.warn("action is expected to be a function, plain Object, null, or undefined", action)
+//     }
 
-    var duration = Math.floor((performance.now() - start) * 100) / 100;
-    // console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
+//     const duration = Math.floor((performance.now() - start) * 100) / 100
+//     console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
 
-    return dispatch;
-  }
+//     return dispatch
 
-  return dispatch(state);
-}
+//   }
+
+//   return dispatch(state)
+
+// }
 
 //
-
-var primitiveTypes = {
-  string: true,
-  number: true,
-  boolean: true
-};
-
-var isArray = Array.isArray;
-
 var testContent = {
-  Array: isArray,
-  primitive: isPrimitive
+  list: isArray,
+  content: isContent,
+  boolean: isBoolean
 };
 
-function structureToState(structure, cycle) {
+function store(component, state, abstract) {
+
+  var model = createModel(state);
+
+  abstract = component({ state: freezeModelToState(model), model: model }, abstract);
+
+  function createModel(value, host, path) {
+
+    var structure = {};
+    var time = Date.now();
+
+    //
+    if (isPlainObject(value)) {
+      for (var key in value) {
+        var location = path ? path + '.' + key : key;
+        structure[key] = createModel(value[key], structure, location);
+      }
+      return structure;
+    }
+    //
+    else {
+        var _ret = function () {
+
+          var kind = getContentKind(value);
+          if (kind) {
+            var dispatch = function dispatch(next) {
+
+              var start = performance.now();
+              var last = structure.next;
+
+              // resolve callback into value using the current value
+              while ((typeof next === 'undefined' ? 'undefined' : _typeof(next)) == functionType) {
+                next = next(last);
+              } // reset the state of the value if ‘next’ equals null
+              if (next === _null) {
+                console.log('reset', kind);
+              }
+              // proceed to typechecking otherwise
+              else if (next !== _undefined && next !== last) {
+
+                  time = Date.now();
+
+                  if (testContent[kind](next)) {
+                    var object = host[path];
+                    assign(object, { next: next, last: last, time: time });
+                    assign(structure, object);
+
+                    abstract = component({ state: freezeModelToState(model), model: model }, abstract);
+
+                    console.log(performance.now() - start);
+                  } else contentWarning({
+                    value: next,
+                    expected: kind,
+                    received: getContentKind(value),
+                    path: path
+                  });
+                }
+            };
+
+            var changed = function changed(deep) {
+              return structure.last !== structure.next;
+            };
+
+            var next = value;
+            var last = structure.last;
+            assign(structure, { next: next, last: last, time: time, path: path, kind: kind, changed: changed });
+
+            return {
+              v: assign(dispatch, structure)
+            };
+          } else contentWarning({
+            value: value,
+            expected: 'content, boolean, or a list',
+            received: getContentKind(value),
+            path: path
+          });
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      }
+  }
+}
+
+function freezeModelToState(model) {
+  var cycle = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'next';
+
   var state = {};
-  for (var key in structure) {
-    var value = structure[key];
-    state[key] = typeof value == 'function' ? value[cycle] : structureToState(value, cycle);
+  for (var key in model) {
+    var value = model[key];
+    state[key] = (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == functionType ? value[cycle] : freezeModelToState(value, cycle);
   }
   return freeze(state);
 }
 
-function defineStructure(value, host, path) {
-
-  var time = Date.now();
-  var structure = {};
-
-  if (isPlainObject(value)) {
-    for (var key in value) {
-      var location = path ? path + '.' + key : key;
-      structure[key] = defineStructure(value[key], structure, location);
-    }
-    return structure;
-  } else {
-
-    var isPrimitiveValue = isPrimitive(value);
-    if (isPrimitiveValue || isArray(value)) {
-      var _ret = function () {
-        var changed = function changed(deep) {
-          return time !== structure.time && structure.last !== structure.next;
-        };
-
-        var dispatch = function dispatch(next) {
-          var last = structure.next;
-          if (testContent[type](next)) {
-            if (last !== next) {
-              var object = host[path];
-              assign(object, { next: next, last: last, time: Date.now() });
-              assign(structure, object);
-            }
-          } else console.warn("The ‘next’ value  provided to dispatch." + path + "() is of the wrong type: ", { last: last, next: next });
-        };
-
-        var type = isPrimitiveValue ? 'primitive' : 'Array';
-        var next = value;
-
-        assign(structure, { next: next, time: time, path: path, type: type, changed: changed });
-
-        return {
-          v: assign(dispatch, structure)
-        };
-      }();
-
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-    } else console.warn("state value is not valid, expected a" + type, value);
-  }
+function getContentKind(value, type) {
+  type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+  if (isContent(value)) type = 'content';else if (isArray(value)) type = 'list';else if (type == 'boolean') type = 'boolean';
+  return type;
 }
 
-function isPlainObject(value) {
-  return typeof value != 'string' && value == '[object Object]';
-}
+function contentWarning(_ref) {
+  var value = _ref.value,
+      path = _ref.path,
+      expected = _ref.expected,
+      received = _ref.received;
 
-function isPrimitive(value) {
-  return value == null || primitiveTypes[typeof value === 'undefined' ? 'undefined' : _typeof(value)];
+  received = getContentKind(value);
+  console.warn("Value “" + value + "” provided to " + path + " is of the wrong kind:", {
+    expected: expected,
+    received: received
+  });
 }
 
 function transformChild(content, store, type, kind) {

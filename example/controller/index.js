@@ -14,6 +14,8 @@ const controller = {
   },
   
   createTableRows(amount) {
+
+    // const start = performance.now()
     
     const string = 'The HTML tables allow web authors to arrange data like text, images, links, other tables, etc. into rows and columns of cells'
     const stringLength = string.length
@@ -43,6 +45,8 @@ const controller = {
         active: false,
       }
     }
+
+    // console.log(performance.now() - start)
 
     return rows
 

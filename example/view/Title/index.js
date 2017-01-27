@@ -3,15 +3,12 @@ const { compose } = x
 
 const PageHeader = compose('header', { className: 'page', ariaRole: "Title" })
 
-let i = 0
-let count = 0
-
-const TitleEvents = ({ model, state }) => ({
+const TitleEvents = ({ model }) => ({
 	onclick(event) {
-		console.log(model)
+		model.title(value => value + "!")
 	},
 })
 
-const Title = ({ state, model }) => {
-	return PageHeader(['h1', TitleEvents, model.title.next])
+const Title = ({ state }) => {
+	return PageHeader(['h1', TitleEvents, state.title])
 }
