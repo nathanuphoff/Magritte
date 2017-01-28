@@ -7,7 +7,7 @@ An experimental view library utilising a DOM abstraction and reactive incrementa
 To get started locally run `npm install` && `npm start`, then open localhost:10001/example/ in your browser.
 
 ## Why
-To see if I could get a reactive virtual DOM library going while favouring composition over inheritance. *X* is entirely free of `this` and the store is passed to all child content by default. The template syntax is entirely JSON compatible and could therefore theoretically be pre-rendered using any language.
+To see if I could get a reactive virtual DOM library going while favouring composition over inheritance. *X* is entirely free of `this` and the store is passed to all child content by default. The template syntax is entirely JSON compatible and could therefore in theory be pre-rendered using any language.
 
 ### Features
 - A DOM abstraction,
