@@ -1,32 +1,35 @@
 # X
 
-This is an experimental view library using a virtual DOM. Updates to the DOM and virtual DOM are made simultaneously using recursion. There are no tests and no bundler is used. This is *not* production anything.
+An experimental view library utilising a DOM abstraction and reactive incremental rendering. A one-way data store is built in that makes sure you won’t change the ‘kind of data’ on dispatch. In addition the model keeps track on changes in the global state making conditional rendering a breeze.
 
 To try it run `npm install` && `npm start`, then open localhost:10001/example/ in your browser.
 
 ## Why
-This is an experiment to see if I could get a reactive virtual DOM library going while favouring composition over inheritance. *X* is entirely free of `this` and all props are passed through children by default. The template syntax is entirely JSON compatible and could therefore theoretically be pre-rendered using any language.
+To see if I could get a reactive virtual DOM library going while favouring composition over inheritance. *X* is entirely free of `this` and the store is passed to all child content by default. The template syntax is entirely JSON compatible and could therefore theoretically be pre-rendered using any language.
 
-## Features
-- Virtual DOM,
+### Features
+- A DOM abstraction,
 - Incremental updates,
-- Supports SVG including namespaced attributes,
-- Built in store and dispatcher,
+- Supports SVG including xlink-attributes,
+- Built in immutable store,
 - Template middleware,
 - A functional interface,
 - No build pipeline required,
-- Modular,
 - Give or take 4Kb in size (1.5Kb with gzip).
 
-## Coming Soon™
-- A decoupled DOM (for isomorphic rendering),
+### Coming Soon™
 - A router,
-- Store immutability.
+- A way to define an expected content structure for a component,
+- Component lifecycle methods,
+- Investigate JSX-compatibility (see x.element)
+- ~~Store immutability~~.
 
-## Possibly never
+### Maybe one day...
+- Isomorphic rendering
 - Unit tests,
 - Performance tests,
 - Full documentation.
+
 
 ## Basic Usage
 
@@ -36,9 +39,13 @@ You’ll need a root element...
 ```
 ... and some components
 ```javascript
-const state = { name: "World!" }
+const state = { name: "World" }
 
-const Title = ({ state }) => ['h1', "Hello", state.name]
+const events = model => ({
+	onclick: event => model.name("Jane")
+})
+
+const Title = ({ state, model }) => ['h1', events(model), "Hello ", state.name, "!"]
 
 const component = x(Title)
 
@@ -58,11 +65,18 @@ In addition `null`, `undefined`, `true`, or `false` are valid as well:
 - Return `false` to skip rendering for the component and leave it as is.
 
 ### Store
-The store is a plain Object and is passed to every function component. Its properties are `state` and `dispatch`. The dispatcher is also returned when the component is mounted as seen in the snippet above.
+The store is an object that is passed to every component function, its properties are `state` and `model`.
 
-#### Dispatch
-The `dispatch` method is passed to every functional component, it accepts eiter:
-- A function: functions are resolved using the current state as its argument, its return value is used to update the DOM.
-- An object: you may directly pass an object which will be used to update the DOM.
-- `undefined`: the dispatcher won’t be called and the DOM will not be updated.
-- `null`: this renders the `component` using the state that it was initially given.
+### state
+The state is a frozen object (no property reassignment) that keeps track of the application state. Supported data types are the same as those of JSON; null, a string, a number, an Array, or a child object. The state is a reflection of the state/model that was initially passed at component initialisation, this model should provide the data structure for the entire lifecycle of the application (see example/model). 
+
+> By defining the model beforehand the developer is sure to abide to an existing data structure (no runtime changes) which at the same time has been documented as well.
+
+#### model
+The `model` is a reflection of the state structure and will be passed to every functional component, its dispatch methods accept either:
+- A function: functions are resolved using the current state value and the entire state object as its arguments, its return value is used to update the DOM.
+- An Array: this will only update the state if its value was initially an Array, a warning will be logged otherwise.
+- A string or number: this will only update the state if its value was initially a string or number, a warning will be logged otherwise.
+- A boolean: this will only update the state if its value was initially a boolean, a warning will be logged otherwise.
+- `undefined`: an update won’t be done and the component render method will not be initiated.
+- `null`: this renders the `component` using the state that it was initially given (not implemented yet).
