@@ -10,12 +10,12 @@ To see if I could get a reactive virtual DOM library going while favouring compo
 ### Features
 - A DOM abstraction,
 - Incremental updates,
-- Supports SVG including xlink-attributes,
 - Built in immutable store,
-- Template middleware,
+- Supports SVG including xlink-attributes,
+- ~~Template middleware~~,
 - A functional interface,
 - No build pipeline required,
-- Give or take 4Kb in size (1.5Kb with gzip).
+- Give or take 5Kb in size (2Kb gzipped).
 
 ### Coming Soon™
 - A router,
