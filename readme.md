@@ -2,7 +2,9 @@
 
 An experimental view library utilising a DOM abstraction and reactive incremental rendering. A one-way data store is built in that makes sure you won’t change the ‘kind of data’ on dispatch. In addition the model keeps track on changes in the global state making conditional rendering a breeze.
 
-To try it run `npm install` && `npm start`, then open localhost:10001/example/ in your browser.
+[Try it on JSFiddle](https://jsfiddle.net/s110ax9g/)
+
+To get started locally run `npm install` && `npm start`, then open localhost:10001/example/ in your browser.
 
 ## Why
 To see if I could get a reactive virtual DOM library going while favouring composition over inheritance. *X* is entirely free of `this` and the store is passed to all child content by default. The template syntax is entirely JSON compatible and could therefore theoretically be pre-rendered using any language.
