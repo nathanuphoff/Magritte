@@ -101,16 +101,20 @@ const Table = ({ state, model }) => {
             ['h1', "X"]
           ],
           ['div', { className: 'col-md-6' },
-            ['button', { type: 'button', onclick: createNumberOfRows(size.small) }, 'Create 1.000 rows'],
-            ['button', { type: 'button', onclick: createNumberOfRows(size.large) }, 'Create 10.000 rows'],
-            ['button', { type: 'button', onclick: addNumberOfRows(size.small) }, 'Append 1.000 rows'],
-            ['button', { type: 'button', onclick: updateNthRow(10) }, 'Update every 10th row'],
-            ['button', { type: 'button', onclick: deleteAll }, 'Clear'],
-            ['button', { type: 'button', onclick: swapRows }, 'Swap Rows'],
+            ['div', { className: 'col-sm-6 smallpad' },
+              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: createNumberOfRows(size.small) }, 'Create 1.000 rows'],
+              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: addNumberOfRows(size.small) }, 'Append 1.000 rows'],
+              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: deleteAll }, 'Clear'],
+            ],
+            ['div', { className: 'col-sm-6 smallpad' },
+              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: createNumberOfRows(size.large) }, 'Create 10.000 rows'],
+              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: updateNthRow(10) }, 'Update every 10th row'],
+              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: swapRows }, 'Swap Rows'],
+            ],
           ],
         ],
       ],
-      [ 'table', { className: 'table' },
+      [ 'table', { className: 'table table-hover table-striped test-data' },
         [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)]
       ]
     ]
@@ -121,20 +125,20 @@ const Table = ({ state, model }) => {
 
 const removeLabel = testSVG
   ? ['svg', { viewBox: '0 0 24 24', stroke: "red", strokeWidth: 2 }, ['use', { xlinkHref: '#i:remove' }]]
-  : "x"
+  : ['span', { ariaHidden: true, className: 'glyphicon glyphicon-remove' }]
 
 const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
 
   const { selectRow, deleteRow } = events
-  const className = selected === id ? 'active' : ''
+  const className = selected === id ? 'danger' : ''
 
   return [ 'tr', { className, key: id },
       [ 'td', { className: 'id' }, id ], 
       [ 'td', { className: 'item' },
-          [ 'a', { href, onclick: selectRow(id) }, text ]
+          [ 'a', { onclick: selectRow(id) }, text ]
       ],
       [ 'td', { className: 'action' },
-        [ 'button', { type: 'button', onclick: deleteRow(index) }, removeLabel],
+        [ 'a', { onclick: deleteRow(index) }, removeLabel],
       ],
       [ 'td', { className: 'action' }],
     ]
