@@ -33,7 +33,7 @@ To see if I could get a reactive virtual DOM library going while favouring compo
 - Full documentation.
 
 
-## Basic Usage
+## Usage
 
 You’ll need a root element...
 ```html
