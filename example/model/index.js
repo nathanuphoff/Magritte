@@ -3,11 +3,11 @@ const model = {
   metadata: {
     author: "Nathan Uphoff",
   },
-  name: {
-    test: {
-      xoxo: "okay",
+  test: { // this is here to test ‘createModel’
+    child: {
+      content: "okay",
     },
-    list: [],
+    array: [],
   },
   title: "Table data",
   table: [],

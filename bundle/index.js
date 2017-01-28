@@ -246,53 +246,22 @@ function route() {
   };
 }
 
-// export default function store(component, state, abstract) {
-
-//   const initialState = assign({}, state)
-//   function dispatch(action) {
-
-//     const start = performance.now()
-
-//     while (typeof action == functionType) action = action({ state, dispatch })
-
-//     if (action === _null) action = initialState
-
-//     if (action == '[object Object]') {
-//       state = freeze(assign({}, state, action))      
-//       abstract = component({ state, dispatch }, abstract)
-//     }
-//     else if (action != _null) {
-//       console.warn("action is expected to be a function, plain Object, null, or undefined", action)
-//     }
-
-//     const duration = Math.floor((performance.now() - start) * 100) / 100
-//     console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
-
-//     return dispatch
-
-//   }
-
-//   return dispatch(state)
-
-// }
-
 //
-var testContent = {
-  list: isArray,
-  content: isContent,
-  boolean: isBoolean
-};
-
 function store(component, state, abstract) {
 
+  var time = void 0;
   var model = createModel(state);
+  var testContent = {
+    list: isArray,
+    content: isContent,
+    boolean: isBoolean
+  };
 
   abstract = component({ state: freezeModelToState(model), model: model }, abstract);
 
   function createModel(value, host, path) {
 
     var structure = {};
-    var time = Date.now();
 
     //
     if (isPlainObject(value)) {
@@ -318,15 +287,16 @@ function store(component, state, abstract) {
                 next = next(last);
               } // reset the state of the value if ‘next’ equals null
               if (next === _null) {
-                console.log('reset', kind);
+                console.log('reset ' + path + ' to initial value (todo)');
               }
               // proceed to typechecking otherwise
               else if (next !== _undefined && next !== last) {
 
-                  time = Date.now();
-
                   if (testContent[kind](next)) {
+
                     var object = host[path];
+                    time = Date.now(); // update the store time
+
                     assign(object, { next: next, last: last, time: time });
                     assign(structure, object);
 
@@ -342,13 +312,13 @@ function store(component, state, abstract) {
                 }
             };
 
-            var changed = function changed(deep) {
-              return structure.last !== structure.next;
+            var hasChanged = function hasChanged(deep) {
+              return structure.time === time;
             };
 
             var next = value;
             var last = structure.last;
-            assign(structure, { next: next, last: last, time: time, path: path, kind: kind, changed: changed });
+            assign(structure, { next: next, last: last, time: time, path: path, kind: kind, hasChanged: hasChanged });
 
             return {
               v: assign(dispatch, structure)

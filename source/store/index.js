@@ -3,54 +3,23 @@ import {
   isArray, isBoolean, isContent, isPlainObject, isPrimitive 
 } from '../_'
 
-// export default function store(component, state, abstract) {
-
-//   const initialState = assign({}, state)
-//   function dispatch(action) {
-
-//     const start = performance.now()
-
-//     while (typeof action == functionType) action = action({ state, dispatch })
-
-//     if (action === _null) action = initialState
-
-//     if (action == '[object Object]') {
-//       state = freeze(assign({}, state, action))      
-//       abstract = component({ state, dispatch }, abstract)
-//     }
-//     else if (action != _null) {
-//       console.warn("action is expected to be a function, plain Object, null, or undefined", action)
-//     }
-
-//     const duration = Math.floor((performance.now() - start) * 100) / 100
-//     console.log('frame time: ' + duration + 'ms, ' + Math.floor(1e3 / duration) + 'fps')
-
-//     return dispatch
-
-//   }
-
-//   return dispatch(state)
-
-// }
-
 //
-const testContent = {
-  list: isArray,
-  content: isContent,
-  boolean: isBoolean,
-}
-
 export default function store(component, state, abstract) {
-
+  
+  let time
   const model = createModel(state)
+  const testContent = {
+    list: isArray,
+    content: isContent,
+    boolean: isBoolean,
+  }
   
   abstract = component({ state: freezeModelToState(model), model }, abstract)
 
   function createModel(value, host, path) {
     
     const structure = {}
-    let time = Date.now()
-
+    
     //
     if (isPlainObject(value)) {
       for (const key in value) {
@@ -67,7 +36,7 @@ export default function store(component, state, abstract) {
 
         const next = value
         const last = structure.last
-        assign(structure, { next, last, time, path, kind, changed })
+        assign(structure, { next, last, time, path, kind, hasChanged })
         
         return assign(dispatch, structure)
 
@@ -81,15 +50,16 @@ export default function store(component, state, abstract) {
 
           // reset the state of the value if ‘next’ equals null
           if (next === _null) {
-            console.log('reset', kind)
+            console.log('reset ' + path + ' to initial value (todo)')
           }
           // proceed to typechecking otherwise
           else if (next !== _undefined && next !== last) {
             
-            time = Date.now()
-
             if (testContent[kind](next)) {
+              
               const object = host[path]   
+              time = Date.now() // update the store time
+              
               assign(object, { next, last, time })
               assign(structure, object)
 
@@ -109,8 +79,8 @@ export default function store(component, state, abstract) {
 
         }
 
-        function changed(deep) {
-          return structure.last !== structure.next
+        function hasChanged(deep) {
+          return structure.time === time
         }
         
       }

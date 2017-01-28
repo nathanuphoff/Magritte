@@ -7,7 +7,7 @@ const size = {
 }
 
 // Events
-const TableEvents = ({ model, state }) => ({
+const TableEvents = model => ({
 
   deleteRow: index => event => {
     // dispatch({ table: removeAtIndex(index)(state.table) }) -> depricated
@@ -31,10 +31,8 @@ const TableEvents = ({ model, state }) => ({
 
   selectRow: id => event => {
     event.preventDefault()    
-    if (id !== state.selected) {
-      // dispatch({ selected: id }) -> depricated
-      model.selected(id)
-    }
+    // if (id !== state.selected) dispatch({ selected: id }) -> depricated
+    model.selected(id)
   },
 
   deleteAll: event => {
@@ -88,33 +86,36 @@ const TableEvents = ({ model, state }) => ({
 })
 
 const Table = ({ state, model }) => {
-
-  console.log('table changed', model.table.changed())
-
-  const { table, selected } = state
-  const events = TableEvents({ state, model })
-  const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
   
-  return model.table.changed() && [ 'div', { className: 'container' },
-    ['div', { className: 'jumbotron' },
-      ['div', { className: 'row' },
-        ['div', { className: 'col-md-6' },
-          ['h1', "X"]
-        ],
-        ['div', { className: 'col-md-6' },
-          ['button', { type: 'button', onclick: createNumberOfRows(size.small) }, 'Create 1.000 rows'],
-          ['button', { type: 'button', onclick: createNumberOfRows(size.large) }, 'Create 10.000 rows'],
-          ['button', { type: 'button', onclick: addNumberOfRows(size.small) }, 'Append 1.000 rows'],
-          ['button', { type: 'button', onclick: updateNthRow(10) }, 'Update every 10th row'],
-          ['button', { type: 'button', onclick: deleteAll }, 'Clear'],
-          ['button', { type: 'button', onclick: swapRows }, 'Swap Rows'],
+  const { table, selected } = model
+  if (table.hasChanged() || selected.hasChanged()) {
+
+    const { table, selected } = state
+    const events = TableEvents(model)
+    const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
+    
+    return [ 'div', { className: 'container' },
+      ['div', { className: 'jumbotron' },
+        ['div', { className: 'row' },
+          ['div', { className: 'col-md-6' },
+            ['h1', "X"]
+          ],
+          ['div', { className: 'col-md-6' },
+            ['button', { type: 'button', onclick: createNumberOfRows(size.small) }, 'Create 1.000 rows'],
+            ['button', { type: 'button', onclick: createNumberOfRows(size.large) }, 'Create 10.000 rows'],
+            ['button', { type: 'button', onclick: addNumberOfRows(size.small) }, 'Append 1.000 rows'],
+            ['button', { type: 'button', onclick: updateNthRow(10) }, 'Update every 10th row'],
+            ['button', { type: 'button', onclick: deleteAll }, 'Clear'],
+            ['button', { type: 'button', onclick: swapRows }, 'Swap Rows'],
+          ],
         ],
       ],
-    ],
-    [ 'table', { className: 'table' },
-      [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)]
+      [ 'table', { className: 'table' },
+        [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)]
+      ]
     ]
-  ]
+    
+  }
 
 }
 
