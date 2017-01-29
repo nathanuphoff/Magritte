@@ -9,10 +9,9 @@ export function renderAttributes(node, content, abstract, namespace) {
     
     const value = content[key]
     if (value !== abstract[key]) {
-      const match = key.match(attributeHandlers.pattern)
-      if (match) {
-        const [key, head, tail] = match
-        attributeHandlers.methods[head](node, key, value, [head, tail]) 
+      if (attributeHandlers.pattern.test(key)) {
+        const match = key.match(attributeHandlers.pattern)[0]
+        attributeHandlers.methods[match](node, key, value) 
       }
       else if (namespace) setAttribute(node, key, value)
       else node[key] = value

@@ -9,17 +9,15 @@ export const attributeHandlers = handleAttributes({
     setAttribute(node, key, value)
   },
   
-  data(node, key, value, [head, tail]) {    
-    key = toLowerCase(tail[0]) + tail.substr(1)
+  data(node, key, value) {
+    key = toLowerCase(key[4]) + key.substr(5)
     node.dataset[key] = value
   },
   
-  viewBox(node, key, value) {
-    setAttribute(node, key, value)
-  },
+  viewBox: setAttribute,
   
-  xlink(node, key, value, [head, tail]) {
-    key = head + ':' + toLowerCase(tail)
+  xlink(node, key, value) {
+    key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1:$2'))    
     setAttribute(node, key, value, 'http://www.w3.org/1999/xlink')
   },
 
