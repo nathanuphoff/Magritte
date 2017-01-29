@@ -1,6 +1,6 @@
 # X
 
-A tiny reactive view library for the browser that relies on functional composition, and utilises a DOM abstraction with incremental updates. A one-directional data store is built in that makes sure you won’t change the ‘kind of data’ of the state during runtime. From the initial state a store model is created that is used as a dispatcher, it keeps track of changes in the store and renders a new immutable state on each render cycle.
+A tiny reactive view library for the browser that relies on functional composition, and utilises a DOM abstraction with incremental updates. A one-directional data store is included that prevents runtime changes to the ‘kind of data’ of the state. From the initial state a store model is created that is used as a dispatcher, it keeps track of changes in the state and renders a new immutable state on each render cycle.
 
 Key features are API simplicity, functional composition, store immutability, and *very little* boilerplate. 
 
