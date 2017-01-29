@@ -1,2 +1,2 @@
-export { transformChild } from './transformChild'
+export { resolveChild } from './resolveChild'
 export { attributeHandlers } from './attributeHandlers'

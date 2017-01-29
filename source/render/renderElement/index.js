@@ -1,5 +1,5 @@
 import { _null, listType, objectType, contentTypes, assign, namespaces, emptyObject } from '../../_'
-import { transformChild } from '../../middleware'
+import { resolveChild } from '../../middleware'
 import { createElement } from '../createElement'
 import { renderContent } from '../renderContent'
 import { renderAttributes } from '../renderAttributes'
@@ -9,7 +9,6 @@ mount.initEvent('mount', true, true)
 
 export function renderElement(parent, template, abstract, store, name, namespace) {
 
-
   const type = abstract.node === parent ? _null : template[0]
   namespace = namespace || namespaces[type]
 
@@ -18,14 +17,14 @@ export function renderElement(parent, template, abstract, store, name, namespace
   const vdom = createNode ? [type] : abstract.vdom
   const attributes = {}
 
-  // render element child content
+  // render element children
   const length = template.length
   let index = !!type - 1
   while (++index < length) {
-
-    let [content, type, kind, name] = transformChild(template[index], store)
+    
+    let [content, type, kind, name] = resolveChild(template[index], store)
     let child = vdom[index] || emptyObject
-
+    
     if (content === true) [content, type, kind, name] = transformChild(child.vdom)
 
     if (contentTypes[type]) {
@@ -49,12 +48,6 @@ export function renderElement(parent, template, abstract, store, name, namespace
   // render element attributes
   assign(attributes, renderAttributes(node, attributes, abstract.attributes, namespace))
 
-  // experimental: trigger custom lifecycle events
-  if (createNode && attributes['onmount']) {
-    node.addEventListener('mount', attributes['onmount'], false)
-    node.dispatchEvent(mount)
-  }
-
   // add/remove children
   if (createNode) parent.appendChild(node)
   else while (index < vdom.length) {
@@ -62,7 +55,13 @@ export function renderElement(parent, template, abstract, store, name, namespace
     if (child.node) node.removeChild(child.node)
     index++
   }
-  vdom.length = length   
+  vdom.length = length
+  
+  // experimental: trigger custom lifecycle events
+  if (createNode && attributes['onmount']) {
+    node.addEventListener('mount', attributes['onmount'], false)
+    node.dispatchEvent(mount)
+  }
 
   return { node, type, vdom, name, attributes }
 

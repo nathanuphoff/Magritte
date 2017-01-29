@@ -246,6 +246,7 @@ function route() {
   };
 }
 
+//
 function store(component, state, abstract) {
 
   var time = void 0;
@@ -365,7 +366,7 @@ function contentWarning(_ref) {
   });
 }
 
-function transformChild(content, store, type, kind, name) {
+function resolveChild(content, store, type, kind, name) {
 
   // const pipe = type === _undefined
   type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
@@ -473,30 +474,30 @@ function renderElement(parent, template, abstract, store, name, namespace) {
   var vdom = createNode ? [type] : abstract.vdom;
   var attributes = {};
 
-  // render element child content
+  // render element children
   var length = template.length;
   var index = !!type - 1;
   while (++index < length) {
-    var _transformChild = transformChild(template[index], store),
-        _transformChild2 = slicedToArray(_transformChild, 4),
-        content = _transformChild2[0],
-        _type = _transformChild2[1],
-        kind = _transformChild2[2],
-        _name = _transformChild2[3];
+    var _resolveChild = resolveChild(template[index], store),
+        _resolveChild2 = slicedToArray(_resolveChild, 4),
+        content = _resolveChild2[0],
+        _type = _resolveChild2[1],
+        kind = _resolveChild2[2],
+        _name = _resolveChild2[3];
 
     var child = vdom[index] || emptyObject;
 
     if (content === true) {
       
 
-      var _transformChild3 = transformChild(child.vdom);
+      var _transformChild = transformChild(child.vdom);
 
-      var _transformChild4 = slicedToArray(_transformChild3, 4);
+      var _transformChild2 = slicedToArray(_transformChild, 4);
 
-      content = _transformChild4[0];
-      _type = _transformChild4[1];
-      kind = _transformChild4[2];
-      _name = _transformChild4[3];
+      content = _transformChild2[0];
+      _type = _transformChild2[1];
+      kind = _transformChild2[2];
+      _name = _transformChild2[3];
     }if (contentTypes[_type]) {
       vdom[index] = renderContent(node, content, child, store);
     } else if (_type == listType) {
@@ -513,12 +514,6 @@ function renderElement(parent, template, abstract, store, name, namespace) {
   // render element attributes
   assign(attributes, renderAttributes(node, attributes, abstract.attributes, namespace));
 
-  // experimental: trigger custom lifecycle events
-  if (createNode && attributes['onmount']) {
-    node.addEventListener('mount', attributes['onmount'], false);
-    node.dispatchEvent(mount);
-  }
-
   // add/remove children
   if (createNode) parent.appendChild(node);else while (index < vdom.length) {
     var _child = vdom[index];
@@ -526,6 +521,12 @@ function renderElement(parent, template, abstract, store, name, namespace) {
     index++;
   }
   vdom.length = length;
+
+  // experimental: trigger custom lifecycle events
+  if (createNode && attributes['onmount']) {
+    node.addEventListener('mount', attributes['onmount'], false);
+    node.dispatchEvent(mount);
+  }
 
   return { node: node, type: type, vdom: vdom, name: name, attributes: attributes };
 }

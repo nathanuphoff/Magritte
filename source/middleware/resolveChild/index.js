@@ -1,6 +1,6 @@
 import { _null, pipe, functionType, booleanType, listType, stringType, contentTypes } from '../../_'
 
-export function transformChild(content, store, type, kind, name) {
+export function resolveChild(content, store, type, kind, name) {
   
   // const pipe = type === _undefined
   type = typeof content

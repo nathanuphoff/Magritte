@@ -83,8 +83,7 @@ const TableEvents = model => ({
   },
   
   onmount: ({ target }) => {
-    // const tableRows = target.getElementsByClassName('.danger')
-    // console.log(tableRows)
+    console.log(target.children)
   },
 
 })
@@ -99,7 +98,7 @@ const Table = ({ state, model }) => {
     const events = TableEvents(model)
     const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows, onmount } = events
     
-    return [ 'div', { className: 'container', onmount: onmount },
+    return [ 'div', { className: 'container', onmount },
       ['div', { className: 'jumbotron' },
         ['div', { className: 'row' },
           ['div', { className: 'col-md-6' },
@@ -135,10 +134,10 @@ const removeLabel = testSVG
 // TableRow component
 const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
 
-  const { selectRow, deleteRow } = events
+  const { selectRow, deleteRow, onmount } = events
   const className = selected === id ? 'danger' : ''
 
-  return [ 'tr', { className, key: id },
+  return [ 'tr', { className },
       [ 'td', { className: 'id' }, id ], 
       [ 'td', { className: 'item' },
           [ 'a', { onclick: selectRow(id) }, text ]
