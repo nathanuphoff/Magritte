@@ -1,5 +1,3 @@
-document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
-var x = (function () {
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
@@ -195,7 +193,7 @@ function createPropertyHandlers(defaultPattern) {
   return function (object) {
     var methods = assign(cache.methods, object);
     var keys = Object.keys(methods).join('|');
-    var pattern = keys ? new RegExp('^(' + keys + ')(.*)') : defaultPattern;
+    var pattern = keys ? new RegExp('^' + keys) : defaultPattern;
     return assign(cache, { methods: methods, pattern: pattern });
   };
 }
@@ -346,12 +344,10 @@ function store(component, state, abstract) {
 }
 
 function freezeModelToState(model) {
-  var cycle = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'next';
-
   var state = {};
   for (var key in model) {
     var value = model[key];
-    state[key] = (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == functionType ? value[cycle] : freezeModelToState(value, cycle);
+    state[key] = (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == functionType ? value.next : freezeModelToState(value);
   }
   return freeze(state);
 }
@@ -411,23 +407,16 @@ var attributeHandlers = handleAttributes({
     key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1-$2'));
     setAttribute(node, key, value);
   },
-  data: function data(node, key, value, _ref) {
-    var _ref2 = slicedToArray(_ref, 2),
-        head = _ref2[0],
-        tail = _ref2[1];
-
-    key = toLowerCase(tail[0]) + tail.substr(1);
+  data: function data(node, key, value) {
+    key = toLowerCase(key[4]) + key.substr(5);
     node.dataset[key] = value;
   },
-  viewBox: function viewBox(node, key, value) {
-    setAttribute(node, key, value);
-  },
-  xlink: function xlink(node, key, value, _ref3) {
-    var _ref4 = slicedToArray(_ref3, 2),
-        head = _ref4[0],
-        tail = _ref4[1];
 
-    key = head + ':' + toLowerCase(tail);
+
+  viewBox: setAttribute,
+
+  xlink: function xlink(node, key, value) {
+    key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1:$2'));
     setAttribute(node, key, value, 'http://www.w3.org/1999/xlink');
   }
 });
@@ -455,14 +444,9 @@ function renderAttributes(node, content, abstract, namespace) {
 
     var value = content[key];
     if (value !== abstract[key]) {
-      var match = key.match(attributeHandlers.pattern);
-      if (match) {
-        var _match = slicedToArray(match, 3),
-            _key = _match[0],
-            head = _match[1],
-            tail = _match[2];
-
-        attributeHandlers.methods[head](node, _key, value, [head, tail]);
+      if (attributeHandlers.pattern.test(key)) {
+        var match = key.match(attributeHandlers.pattern)[0];
+        attributeHandlers.methods[match](node, key, value);
       } else if (namespace) setAttribute(node, key, value);else node[key] = value;
     }
   }
@@ -470,8 +454,7 @@ function renderAttributes(node, content, abstract, namespace) {
   return content;
 }
 
-var mount = document.createEvent('Event');
-mount.initEvent('mount', true, true);
+var mount = _document.createEvent('Event').initEvent('mount', true, true);
 
 function renderElement(parent, template, abstract, store, name, namespace) {
 
@@ -564,6 +547,4 @@ function factory() {
 
 var index = assign(factory, methods);
 
-return index;
-
-}());
+module.exports = index;

@@ -4,7 +4,9 @@
   "description": "A collection of functional general purpose browser methods.",
   "main": "source/index.js",
   "scripts": {
-    "start": "rollup -c --watch"
+    "start": "rollup -c --watch",
+    "build": "rollup -c --environment script:build",
+    "uglify": "rollup -c --environment script:uglify"
   },
   "repository": {
     "type": "git",
