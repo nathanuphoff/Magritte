@@ -246,7 +246,6 @@ function route() {
   };
 }
 
-//
 function store(component, state, abstract) {
 
   var time = void 0;
@@ -366,11 +365,12 @@ function contentWarning(_ref) {
   });
 }
 
-function transformChild(content, store, type, kind) {
+function transformChild(content, store, type, kind, name) {
 
   // const pipe = type === _undefined
   type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   while (type == functionType) {
+    name = content.name;
     content = content(store);
     type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   }
@@ -381,7 +381,7 @@ function transformChild(content, store, type, kind) {
     if (content == _null) content = _null;else if (!contentTypes[type] && _typeof(content[0]) == stringType) type = listType;
   }
 
-  return [content, type, kind];
+  return [content, type, kind, name];
   // return pipe && flow
   //   ? distill(flow(content), store, type)
   //   : [content, type, kind]
@@ -397,6 +397,10 @@ function setAttribute(node, key, value, namespace) {
 }
 
 var attributeHandlers = attribute({
+  aria: function aria(node, key, value) {
+    key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1-$2'));
+    setAttribute(node, key, value);
+  },
   data: function data(node, key, value, _ref) {
     var _ref2 = slicedToArray(_ref, 2),
         head = _ref2[0],
@@ -405,6 +409,9 @@ var attributeHandlers = attribute({
     key = toLowerCase(tail[0]) + tail.substr(1);
     node.dataset[key] = value;
   },
+  viewBox: function viewBox(node, key, value) {
+    setAttribute(node, key, value);
+  },
   xlink: function xlink(node, key, value, _ref3) {
     var _ref4 = slicedToArray(_ref3, 2),
         head = _ref4[0],
@@ -412,13 +419,6 @@ var attributeHandlers = attribute({
 
     key = head + ':' + toLowerCase(tail);
     setAttribute(node, key, value, 'http://www.w3.org/1999/xlink');
-  },
-  viewBox: function viewBox(node, key, value) {
-    setAttribute(node, key, value);
-  },
-  aria: function aria(node, key, value) {
-    key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1-$2'));
-    setAttribute(node, key, value);
   }
 });
 
@@ -460,15 +460,16 @@ function renderAttributes(node, content, abstract, namespace) {
   return content;
 }
 
-function renderElement(parent, template, abstract, store, namespace) {
+var mount = document.createEvent('Event');
+mount.initEvent('mount', true, true);
 
-  abstract = abstract || emptyObject;
+function renderElement(parent, template, abstract, store, name, namespace) {
+
   var type = abstract.node === parent ? _null : template[0];
   namespace = namespace || namespaces[type];
 
-  var createNode = type !== abstract.type;
+  var createNode = abstract.name !== name || abstract.type !== type;
   var node = createNode ? createElement(type, namespace) : abstract.node;
-
   var vdom = createNode ? [type] : abstract.vdom;
   var attributes = {};
 
@@ -477,10 +478,11 @@ function renderElement(parent, template, abstract, store, namespace) {
   var index = !!type - 1;
   while (++index < length) {
     var _transformChild = transformChild(template[index], store),
-        _transformChild2 = slicedToArray(_transformChild, 3),
+        _transformChild2 = slicedToArray(_transformChild, 4),
         content = _transformChild2[0],
         _type = _transformChild2[1],
-        kind = _transformChild2[2];
+        kind = _transformChild2[2],
+        _name = _transformChild2[3];
 
     var child = vdom[index] || emptyObject;
 
@@ -489,15 +491,16 @@ function renderElement(parent, template, abstract, store, namespace) {
 
       var _transformChild3 = transformChild(child.vdom);
 
-      var _transformChild4 = slicedToArray(_transformChild3, 3);
+      var _transformChild4 = slicedToArray(_transformChild3, 4);
 
       content = _transformChild4[0];
       _type = _transformChild4[1];
       kind = _transformChild4[2];
+      _name = _transformChild4[3];
     }if (contentTypes[_type]) {
       vdom[index] = renderContent(node, content, child, store);
     } else if (_type == listType) {
-      vdom[index] = renderElement(node, content, child, store, namespace);
+      vdom[index] = renderElement(node, content, child, store, _name, namespace);
     } else if (_type == objectType) {
       vdom[index] = _null;
       if (content == _null) {
@@ -508,7 +511,13 @@ function renderElement(parent, template, abstract, store, namespace) {
   }
 
   // render element attributes
-  attributes = renderAttributes(node, attributes, abstract.attributes, namespace);
+  assign(attributes, renderAttributes(node, attributes, abstract.attributes, namespace));
+
+  // experimental: trigger custom lifecycle events
+  if (createNode && attributes['onmount']) {
+    node.addEventListener('mount', attributes['onmount'], false);
+    node.dispatchEvent(mount);
+  }
 
   // add/remove children
   if (createNode) parent.appendChild(node);else while (index < vdom.length) {
@@ -518,7 +527,7 @@ function renderElement(parent, template, abstract, store, namespace) {
   }
   vdom.length = length;
 
-  return { node: node, type: type, vdom: vdom, attributes: attributes };
+  return { node: node, type: type, vdom: vdom, name: name, attributes: attributes };
 }
 
 var render = function (node, template) {

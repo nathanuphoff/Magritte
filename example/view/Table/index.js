@@ -6,7 +6,7 @@ const size = {
   large: 1e4,
 }
 
-// Events
+// Events (ideally in its own file)
 const TableEvents = model => ({
 
   deleteRow: index => event => {
@@ -15,17 +15,18 @@ const TableEvents = model => ({
   },
 
   updateNthRow: n => event => {
-
-    function updateNthItem(item, index) {
+  
+    // in this example ‘updateNthItem’ is expected to be defined elsewhere
+    const updateNthItem = n => map((item, index) => {
       if (index % n < 1) item.text += '!'
       return item
-    }
+    })
 
     // if (table.length) {
     //   dispatch({ table: map(updateNthItem)(state.table) }) -> depricated
     // }
 
-    model.table(map(updateNthItem))
+    model.table(updateNthItem(n))
 
   },
 
@@ -81,10 +82,14 @@ const TableEvents = model => ({
 
   },
   
-  onmount: console.log,
+  onmount: ({ target }) => {
+    // const tableRows = target.getElementsByClassName('.danger')
+    // console.log(tableRows)
+  },
 
 })
 
+// Table component
 const Table = ({ state, model }) => {
   
   const { table, selected } = model
@@ -127,6 +132,7 @@ const removeLabel = testSVG
   ? ['svg', { viewBox: '0 0 24 24', stroke: "red", strokeWidth: 2 }, ['use', { xlinkHref: '#i:remove' }]]
   : ['span', { ariaHidden: true, className: 'glyphicon glyphicon-remove' }]
 
+// TableRow component
 const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
 
   const { selectRow, deleteRow } = events
