@@ -9,7 +9,7 @@ const model = {
     },
     array: [],
   },
-  title: "Table data",
+  title: "X",
   table: [],
   selected: null,
 }

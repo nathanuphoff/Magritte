@@ -90,7 +90,7 @@ const Table = ({ state, model }) => {
   const { table, selected } = model
   if (table.hasChanged() || selected.hasChanged()) {
 
-    const { table, selected } = state
+    const { title, table, selected } = state
     const events = TableEvents(model)
     const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
     
@@ -98,7 +98,7 @@ const Table = ({ state, model }) => {
       ['div', { className: 'jumbotron' },
         ['div', { className: 'row' },
           ['div', { className: 'col-md-6' },
-            ['h1', "X"]
+            ['h1', title],
           ],
           ['div', { className: 'col-md-6' },
             ['div', { className: 'col-sm-6 smallpad' },
@@ -115,8 +115,8 @@ const Table = ({ state, model }) => {
         ],
       ],
       [ 'table', { className: 'table table-hover table-striped test-data' },
-        [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)]
-      ]
+        [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)],
+      ],
     ]
     
   }
@@ -134,15 +134,15 @@ const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
   const className = selected === id ? 'danger' : ''
 
   return [ 'tr', { className },
-      [ 'td', { className: 'id' }, id ], 
-      [ 'td', { className: 'item' },
-          [ 'a', { onclick: selectRow(id) }, text ]
-      ],
-      [ 'td', { className: 'action' },
-        [ 'a', { onclick: deleteRow(index) }, removeLabel],
-      ],
-      [ 'td', { className: 'action' }],
-    ]
+    [ 'td', { className: 'id' }, id], 
+    [ 'td', { className: 'item' },
+        [ 'a', { onclick: selectRow(id) }, text],
+    ],
+    [ 'td', { className: 'action' },
+      [ 'a', { onclick: deleteRow(index) }, removeLabel],
+    ],
+    [ 'td', { className: 'action' }],
+  ]
 
 }
 
