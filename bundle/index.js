@@ -226,8 +226,6 @@ function toLowerCase(value) {
   return value.toLowerCase(value);
 }
 
-var attribute = createPropertyHandlers(/(?!)/);
-
 function compose() {
   var base = slice(arguments);
   return function () {
@@ -239,12 +237,23 @@ function element() {
   return arguments;
 }
 
+var handleAttributes = createPropertyHandlers(/(?!)/);
+
 function route() {
   var parameters = arguments;
   return function (template) {
     return template;
   };
 }
+
+
+
+var methods = Object.freeze({
+	compose: compose,
+	element: element,
+	handleAttributes: handleAttributes,
+	route: route
+});
 
 //
 function store(component, state, abstract) {
@@ -397,7 +406,7 @@ function setAttribute(node, key, value, namespace) {
   }
 }
 
-var attributeHandlers = attribute({
+var attributeHandlers = handleAttributes({
   aria: function aria(node, key, value) {
     key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1-$2'));
     setAttribute(node, key, value);
@@ -553,12 +562,7 @@ function factory() {
   };
 }
 
-var index = assign(factory, {
-  attribute: attribute,
-  compose: compose,
-  element: element,
-  route: route
-});
+var index = assign(factory, methods);
 
 return index;
 

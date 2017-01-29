@@ -1,5 +1,5 @@
 import { _document, assign } from './_'
-import { attribute, compose, element, route } from './component'
+import * as methods from './component'
 import store from './store'
 import render from './render'
 
@@ -15,9 +15,4 @@ function factory() {
 
 }
 
-export default assign(factory, {
-  attribute,
-  compose,
-  element,
-  route,
-})
+export default assign(factory, methods)

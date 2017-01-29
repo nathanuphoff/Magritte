@@ -1,8 +1,8 @@
 import { toLowerCase, functionType } from '../../_'
-import { attribute } from '../../component'
+import { handleAttributes } from '../../component'
 import { setAttribute } from '../../document'
 
-export const attributeHandlers = attribute({
+export const attributeHandlers = handleAttributes({
   
   aria(node, key, value) {
     key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1-$2'))
