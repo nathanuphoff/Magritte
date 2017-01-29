@@ -144,7 +144,7 @@ With handleAttributes you can define middleware that is responsible for setting 
 > The default bespoke methods are located at ./source/middleware/attributeHandlers.
 
 ### #route
-Not implemented yet, will be used to define routed components. The proposed syntax is:
+Not implemented yet, will be used to define routed components.
 
 ### #structure
 Under consideration, a way to define a content structure that a component has to abide by.
