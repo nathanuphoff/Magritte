@@ -15,7 +15,7 @@ const TableEvents = model => ({
   },
 
   updateNthRow: n => event => {
-  
+
     // in this example ‘updateNthItem’ is expected to be defined elsewhere
     const updateNthItem = n => map((item, index) => {
       if (index % n < 1) item.text += '!'
@@ -48,7 +48,7 @@ const TableEvents = model => ({
   },
 
   addNumberOfRows: amount => event => {
-    
+
     // const table = state.table.concat(createTableRows(amount)) -> now obsolete
     // dispatch({ table }) ->depricated
 
@@ -59,7 +59,7 @@ const TableEvents = model => ({
   },
 
   swapRows: event => {
-    
+
     // const { table } = state -> now obsolete
     // if (table.length) {
     //   var a = table[4]
@@ -76,7 +76,7 @@ const TableEvents = model => ({
       result[b] = array[a]
       return result
     }
-    
+
      model.table(swapArrayValues(4, 8)) 
     // now a new array is dispatched which allows for referential comparison
 
@@ -86,14 +86,14 @@ const TableEvents = model => ({
 
 // Table component
 const Table = ({ state, model }) => {
-  
+
   const { table, selected } = model
   if (table.hasChanged() || selected.hasChanged()) {
 
     const { title, table, selected } = state
     const events = TableEvents(model)
     const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
-    
+
     return [ 'div', { className: 'container' },
       ['div', { className: 'jumbotron' },
         ['div', { className: 'row' },
@@ -118,7 +118,7 @@ const Table = ({ state, model }) => {
         [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)],
       ],
     ]
-    
+
   }
 
 }
@@ -136,7 +136,7 @@ const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
   return [ 'tr', { className },
     [ 'td', { className: 'id' }, id], 
     [ 'td', { className: 'item' },
-        [ 'a', { onclick: selectRow(id) }, text],
+        [ 'a', { onclick: selectRow(index) }, text],
     ],
     [ 'td', { className: 'action' },
       [ 'a', { onclick: deleteRow(index) }, removeLabel],

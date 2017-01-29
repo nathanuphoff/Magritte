@@ -239,6 +239,7 @@ function element() {
 
 var handleAttributes = createPropertyHandlers(/(?!)/);
 
+// under construction
 function route() {
   var parameters = arguments;
   return function (template) {
@@ -246,16 +247,27 @@ function route() {
   };
 }
 
+// under construction
+function structure(assert) {
+
+	return function (template) {
+		return function (data, b, c, d, e, f) {
+			return template(data, b, c, d, e, f);
+		};
+	};
+}
+
+// Public API methods
 
 
 var methods = Object.freeze({
 	compose: compose,
 	element: element,
 	handleAttributes: handleAttributes,
-	route: route
+	route: route,
+	structure: structure
 });
 
-//
 function store(component, state, abstract) {
 
   var time = void 0;

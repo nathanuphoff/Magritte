@@ -1,4 +1,5 @@
-import { _document } from '../../_'
+// under construction
+import { _null } from '../../_'
 
 export function route() {
   const parameters = arguments
