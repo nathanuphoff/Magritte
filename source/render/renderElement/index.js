@@ -4,6 +4,9 @@ import { createElement } from '../createElement'
 import { renderContent } from '../renderContent'
 import { renderAttributes } from '../renderAttributes'
 
+const mount = document.createEvent('Event')
+mount.initEvent('mount', true, true)
+
 export function renderElement(parent, template, abstract, store, namespace) {
 
   abstract = abstract || emptyObject
@@ -46,6 +49,11 @@ export function renderElement(parent, template, abstract, store, namespace) {
   
   // render element attributes
   attributes = renderAttributes(node, attributes, abstract.attributes, namespace)
+  
+  if (abstract === emptyObject && attributes['onmount']) {
+    node.addEventListener('mount', attributes['onmount'], false)
+    node.dispatchEvent(mount)
+  }
   
   // add/remove children
   if (createNode) parent.appendChild(node)

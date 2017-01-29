@@ -36,11 +36,9 @@ const TableEvents = model => ({
   },
 
   deleteAll: event => {
-    const { table } = state
-    if (table.length) {
-      // dispatch({ table: [] }) -> depricated
-      model.table([])
-    }
+    // const { table } = state -> now obsolete
+    // if (table.length) dispatch({ table: [] }) -> depricated
+    model.table([])
   },
 
   createNumberOfRows: amount => event => {
@@ -82,6 +80,8 @@ const TableEvents = model => ({
     // now a new array is dispatched which allows for referential comparison
 
   },
+  
+  onmount: console.log,
 
 })
 
@@ -92,9 +92,9 @@ const Table = ({ state, model }) => {
 
     const { table, selected } = state
     const events = TableEvents(model)
-    const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
+    const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows, onmount } = events
     
-    return [ 'div', { className: 'container' },
+    return [ 'div', { className: 'container', onmount: onmount },
       ['div', { className: 'jumbotron' },
         ['div', { className: 'row' },
           ['div', { className: 'col-md-6' },
