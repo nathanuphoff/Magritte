@@ -81,10 +81,6 @@ const TableEvents = model => ({
     // now a new array is dispatched which allows for referential comparison
 
   },
-  
-  onmount: ({ target }) => {
-    console.log(target.children)
-  },
 
 })
 
@@ -96,9 +92,9 @@ const Table = ({ state, model }) => {
 
     const { table, selected } = state
     const events = TableEvents(model)
-    const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows, onmount } = events
+    const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
     
-    return [ 'div', { className: 'container', onmount },
+    return [ 'div', { className: 'container' },
       ['div', { className: 'jumbotron' },
         ['div', { className: 'row' },
           ['div', { className: 'col-md-6' },

@@ -104,13 +104,13 @@ export default function store(component, state, abstract) {
 
 
 
-function freezeModelToState(model, cycle = 'next') {
+function freezeModelToState(model) {
   const state = {}
   for (const key in model) {
     const value = model[key]
     state[key] = typeof value == functionType
-      ? value[cycle]
-      : freezeModelToState(value, cycle)
+      ? value.next
+      : freezeModelToState(value)
   }
   return freeze(state)
 }

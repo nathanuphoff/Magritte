@@ -139,7 +139,7 @@ const Header = ({ state }) => x.element('header', { className: 'page' },
 The snippets above have an identical outcome.
 
 ### #handleAttributes
-With handleAttributes you can define middleware that is responsible for setting attributes to an element. By default aria, data, viewBox, and data-attributes use a bespoke attribute handler to ensure compatibility with the DOM-API. By default the attribute value is set directly as the node property value, for elements with a namespace (svg) a wrapper for node.setAttribute is used. More coming soon...
+With handleAttributes you can define middleware that is responsible for setting attributes to an element. By default aria, data, viewBox, and xlink-attributes use a bespoke attribute handler to ensure compatibility with the DOM-API. By default the attribute value is set directly as the node property value, for elements with a namespace (svg) a wrapper for node.setAttribute is used. More coming soon...
 
 > The default bespoke methods are located at ./source/middleware/attributeHandlers.
 

@@ -1,11 +1,10 @@
-import { _null, listType, objectType, contentTypes, assign, namespaces, emptyObject } from '../../_'
+import { _document, _null, listType, objectType, contentTypes, assign, namespaces, emptyObject } from '../../_'
 import { resolveChild } from '../../middleware'
 import { createElement } from '../createElement'
 import { renderContent } from '../renderContent'
 import { renderAttributes } from '../renderAttributes'
 
-const mount = document.createEvent('Event')
-mount.initEvent('mount', true, true)
+const mount = _document.createEvent('Event').initEvent('mount', true, true)
 
 export function renderElement(parent, template, abstract, store, name, namespace) {
 
