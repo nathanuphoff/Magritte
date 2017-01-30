@@ -238,6 +238,7 @@ function element() {
 
 var handleAttributes = createPropertyHandlers(/(?!)/);
 
+// under construction
 function route() {
   var parameters = arguments;
   return function (template) {
@@ -245,22 +246,34 @@ function route() {
   };
 }
 
+// under construction
+function structure(assert) {
+
+	return function (template) {
+		return function (data, b, c, d, e, f) {
+			return template(data, b, c, d, e, f);
+		};
+	};
+}
+
+// Public API methods
 
 
 var methods = Object.freeze({
 	compose: compose,
 	element: element,
 	handleAttributes: handleAttributes,
-	route: route
+	route: route,
+	structure: structure
 });
 
 //
 function store(component, state, abstract) {
 
-  var time = void 0;
+  var time = void 0; // global timestamo
   var model = createModel(state);
   var testContent = {
-    list: isArray,
+    Array: isArray,
     content: isContent,
     boolean: isBoolean
   };
@@ -271,7 +284,7 @@ function store(component, state, abstract) {
 
     var structure = {};
 
-    //
+    // plain objects form the layout of the model
     if (isPlainObject(value)) {
       for (var key in value) {
         var location = path ? path + '.' + key : key;
@@ -279,7 +292,7 @@ function store(component, state, abstract) {
       }
       return structure;
     }
-    //
+    // other types of values are considered content
     else {
         var _ret = function () {
 
@@ -294,39 +307,47 @@ function store(component, state, abstract) {
               while ((typeof next === 'undefined' ? 'undefined' : _typeof(next)) == functionType) {
                 next = next(last);
               } // reset the state of the value if ‘next’ equals null
-              if (next === _null) {
-                console.log('reset ' + path + ' to initial value (todo)');
-              }
+              if (next === _null) next = structure.initial;
+
               // proceed to typechecking otherwise
-              else if (next !== _undefined && next !== last) {
+              if (next !== _undefined && next !== last) {
 
-                  if (testContent[kind](next)) {
+                // update the view if next is of the proper type...
+                if (testContent[kind](next)) {
 
-                    var object = host[path];
-                    time = Date.now(); // update the store time
+                  var object = host[path];
+                  time = Date.now(); // update the store time
 
-                    assign(object, { next: next, last: last, time: time });
-                    assign(structure, object);
+                  assign(object, { next: next, last: last, time: time });
+                  assign(structure, object);
 
-                    abstract = component({ state: freezeModelToState(model), model: model }, abstract);
+                  abstract = component({ state: freezeModelToState(model), model: model }, abstract);
 
-                    console.log(performance.now() - start);
-                  } else contentWarning({
+                  console.log(performance.now() - start);
+                }
+                // ...or log a warning otherwise
+                else contentWarning({
                     value: next,
                     expected: kind,
                     received: getContentKind(value),
                     path: path
                   });
-                }
+              }
             };
 
             var hasChanged = function hasChanged(deep) {
               return structure.time === time;
             };
 
-            var next = value;
-            var last = structure.last;
-            assign(structure, { next: next, last: last, time: time, path: path, kind: kind, hasChanged: hasChanged });
+            assign(structure, {
+              next: value,
+              last: _undefined,
+              initial: kind == 'Array' ? slice(value) : value,
+              time: time,
+              path: path,
+              kind: kind,
+              hasChanged: hasChanged
+            });
 
             return {
               v: assign(dispatch, structure)
@@ -355,7 +376,7 @@ function freezeModelToState(model) {
 
 function getContentKind(value, type) {
   type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  if (isContent(value)) type = 'content';else if (isArray(value)) type = 'list';else if (type == 'boolean') type = 'boolean';
+  if (isContent(value)) type = 'content';else if (isArray(value)) type = 'Array';else if (type == 'boolean') type = 'boolean';
   return type;
 }
 

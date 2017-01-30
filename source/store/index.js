@@ -1,15 +1,15 @@
 import { 
-  _null, _undefined, functionType, assign, freeze, 
+  _null, _undefined, functionType, assign, slice, freeze, 
   isArray, isBoolean, isContent, isPlainObject, isPrimitive 
 } from '../_'
 
 //
 export default function store(component, state, abstract) {
   
-  let time
+  let time // global timestamo
   const model = createModel(state)
   const testContent = {
-    list: isArray,
+    Array: isArray,
     content: isContent,
     boolean: isBoolean,
   }
@@ -20,7 +20,7 @@ export default function store(component, state, abstract) {
     
     const structure = {}
     
-    //
+    // plain objects form the layout of the model
     if (isPlainObject(value)) {
       for (const key in value) {
         const location = path ? path + '.' + key : key
@@ -28,15 +28,21 @@ export default function store(component, state, abstract) {
       }
       return structure
     }
-    //
+    // other types of values are considered content
     else {
 
       const kind = getContentKind(value)
       if (kind) {
 
-        const next = value
-        const last = structure.last
-        assign(structure, { next, last, time, path, kind, hasChanged })
+        assign(structure, { 
+          next: value,
+          last: _undefined,
+          initial: kind == 'Array' ? slice(value) : value,
+          time,
+          path,
+          kind,
+          hasChanged
+        })
         
         return assign(dispatch, structure)
 
@@ -49,12 +55,12 @@ export default function store(component, state, abstract) {
           while (typeof next == functionType) next = next(last)
 
           // reset the state of the value if ‘next’ equals null
-          if (next === _null) {
-            console.log('reset ' + path + ' to initial value (todo)')
-          }
+          if (next === _null) next = structure.initial
+
           // proceed to typechecking otherwise
-          else if (next !== _undefined && next !== last) {
+          if (next !== _undefined && next !== last) {
             
+            // update the view if next is of the proper type...
             if (testContent[kind](next)) {
               
               const object = host[path]   
@@ -68,6 +74,7 @@ export default function store(component, state, abstract) {
               console.log(performance.now() - start)
 
             }
+            // ...or log a warning otherwise
             else contentWarning({ 
               value: next,
               expected: kind, 
@@ -97,13 +104,6 @@ export default function store(component, state, abstract) {
 
 }
 
-
-
-
-
-
-
-
 function freezeModelToState(model) {
   const state = {}
   for (const key in model) {
@@ -118,7 +118,7 @@ function freezeModelToState(model) {
 function getContentKind(value, type) {
   type = typeof value
   if (isContent(value)) type = 'content'
-  else if (isArray(value)) type = 'list'
+  else if (isArray(value)) type = 'Array'
   else if (type == 'boolean') type = 'boolean'
   return type
 }

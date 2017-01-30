@@ -39,7 +39,7 @@ const TableEvents = model => ({
   deleteAll: event => {
     // const { table } = state -> now obsolete
     // if (table.length) dispatch({ table: [] }) -> depricated
-    model.table([])
+    model.table(null) // null resets table to its initial state
   },
 
   createNumberOfRows: amount => event => {
