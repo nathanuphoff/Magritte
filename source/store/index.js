@@ -1,6 +1,6 @@
 import { 
-  _null, _undefined, functionType, assign, slice, freeze, 
-  isArray, isBoolean, isContent, isPlainObject, isPrimitive 
+  _null, _undefined, functionType, assign, slice, freeze, isPlainObject,
+  freezeModelToState, getStoreContentKind, testStoreContent,
 } from '../_'
 
 //
@@ -8,11 +8,6 @@ export default function store(component, state, abstract) {
   
   let time // global timestamo
   const model = createModel(state)
-  const testContent = {
-    Array: isArray,
-    content: isContent,
-    boolean: isBoolean,
-  }
   
   abstract = component({ state: freezeModelToState(model), model }, abstract)
 
@@ -31,7 +26,7 @@ export default function store(component, state, abstract) {
     // other types of values are considered content
     else {
 
-      const kind = getContentKind(value)
+      const kind = getStoreContentKind(value)
       if (kind) {
 
         assign(structure, { 
@@ -61,7 +56,7 @@ export default function store(component, state, abstract) {
           if (next !== _undefined && next !== last) {
             
             // update the view if next is of the proper type...
-            if (testContent[kind](next)) {
+            if (testStoreContent[kind](next)) {
               
               const object = host[path]   
               time = Date.now() // update the store time
@@ -78,7 +73,7 @@ export default function store(component, state, abstract) {
             else contentWarning({ 
               value: next,
               expected: kind, 
-              received: getContentKind(value),
+              received: getStoreContentKind(value),
               path,
             })
 
@@ -104,29 +99,8 @@ export default function store(component, state, abstract) {
 
 }
 
-function freezeModelToState(model) {
-  const state = {}
-  for (const key in model) {
-    const value = model[key]
-    state[key] = typeof value == functionType
-      ? value.next
-      : freezeModelToState(value)
-  }
-  return freeze(state)
-}
-
-function getContentKind(value, type) {
-  type = typeof value
-  if (isContent(value)) type = 'content'
-  else if (isArray(value)) type = 'Array'
-  else if (type == 'boolean') type = 'boolean'
-  return type
-}
-
-
-
 function contentWarning({ value, path, expected, received }) {
-  received = getContentKind(value)
+  received = getStoreContentKind(value)
   console.warn("Value “" + value + "” provided to " + path + " is of the wrong kind:", {
     expected,
     received

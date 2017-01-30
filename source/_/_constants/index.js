@@ -1,6 +1,8 @@
 export const _Object = Object
 export const _Array = Array
-export const _document = document
+export const _document = typeof document != 'undefined' ? document : {
+
+}
 export const _isNaN = isNaN
 
 export const functionType = 'function'
@@ -8,7 +10,10 @@ export const booleanType = 'boolean'
 export const objectType = 'object'
 export const stringType = 'string'
 export const numberType = 'number'
+
+export const ArrayType = 'Array'
 export const listType = 'list'
+export const contentType = 'content'
 
 export const _undefined = undefined
 export const _null = null

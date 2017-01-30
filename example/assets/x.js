@@ -146,7 +146,7 @@ var _contentTypes;
 
 var _Object = Object;
 var _Array = Array;
-var _document = document;
+var _document = typeof document != 'undefined' ? document : {};
 var _isNaN = isNaN;
 
 var functionType = 'function';
@@ -154,7 +154,10 @@ var booleanType = 'boolean';
 var objectType = 'object';
 var stringType = 'string';
 var numberType = 'number';
+
+var ArrayType = 'Array';
 var listType = 'list';
+var contentType = 'content';
 
 var _undefined = undefined;
 var _null = null;
@@ -202,16 +205,29 @@ function createPropertyHandlers(defaultPattern) {
 
 var freeze = _Object.freeze;
 
-function isArray(value) {
-  return _Array.isArray(value);
+function freezeModelToState(model) {
+  var state = {};
+  for (var key in model) {
+    var value = model[key];
+    state[key] = (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == functionType ? value.next : freezeModelToState(value);
+  }
+  return freeze(state);
+}
+
+var isArray = _Array.isArray;
+
+function isContent(value) {
+  return value === _null || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == stringType || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == numberType && !_isNaN(value);
+}
+
+function getStoreContentKind(value, type) {
+  type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+  if (isContent(value)) type = contentType;else if (isArray(value)) type = ArrayType;
+  return type;
 }
 
 function isBoolean(value) {
   return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == booleanType;
-}
-
-function isContent(value) {
-  return value === _null || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == stringType || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == numberType && !_isNaN(value);
 }
 
 function isPlainObject(value) {
@@ -221,6 +237,10 @@ function isPlainObject(value) {
 function slice(value) {
   return [].slice.call(value, 0);
 }
+
+var _testStoreContent;
+
+var testStoreContent = (_testStoreContent = {}, defineProperty(_testStoreContent, ArrayType, isArray), defineProperty(_testStoreContent, contentType, isContent), defineProperty(_testStoreContent, booleanType, isBoolean), _testStoreContent);
 
 function toLowerCase(value) {
   return value.toLowerCase(value);
@@ -273,11 +293,6 @@ function store(component, state, abstract) {
 
   var time = void 0; // global timestamo
   var model = createModel(state);
-  var testContent = {
-    Array: isArray,
-    content: isContent,
-    boolean: isBoolean
-  };
 
   abstract = component({ state: freezeModelToState(model), model: model }, abstract);
 
@@ -297,7 +312,7 @@ function store(component, state, abstract) {
     else {
         var _ret = function () {
 
-          var kind = getContentKind(value);
+          var kind = getStoreContentKind(value);
           if (kind) {
             var dispatch = function dispatch(next) {
 
@@ -314,7 +329,7 @@ function store(component, state, abstract) {
               if (next !== _undefined && next !== last) {
 
                 // update the view if next is of the proper type...
-                if (testContent[kind](next)) {
+                if (testStoreContent[kind](next)) {
 
                   var object = host[path];
                   time = Date.now(); // update the store time
@@ -330,7 +345,7 @@ function store(component, state, abstract) {
                 else contentWarning({
                     value: next,
                     expected: kind,
-                    received: getContentKind(value),
+                    received: getStoreContentKind(value),
                     path: path
                   });
               }
@@ -366,28 +381,13 @@ function store(component, state, abstract) {
   }
 }
 
-function freezeModelToState(model) {
-  var state = {};
-  for (var key in model) {
-    var value = model[key];
-    state[key] = (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == functionType ? value.next : freezeModelToState(value);
-  }
-  return freeze(state);
-}
-
-function getContentKind(value, type) {
-  type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  if (isContent(value)) type = 'content';else if (isArray(value)) type = 'Array';else if (type == 'boolean') type = 'boolean';
-  return type;
-}
-
 function contentWarning(_ref) {
   var value = _ref.value,
       path = _ref.path,
       expected = _ref.expected,
       received = _ref.received;
 
-  received = getContentKind(value);
+  received = getStoreContentKind(value);
   console.warn("Value “" + value + "” provided to " + path + " is of the wrong kind:", {
     expected: expected,
     received: received
