@@ -1,7 +1,7 @@
 {
-  "name": "micro",
-  "version": "0.0.1",
-  "description": "A collection of functional general purpose browser methods.",
+  "name": "x",
+  "version": "0.0.2",
+  "description": "A fast and simple reactive view library for the browser",
   "main": "source/index.js",
   "scripts": {
     "start": "rollup -c --watch",
