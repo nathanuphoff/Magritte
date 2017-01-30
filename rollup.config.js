@@ -8,7 +8,7 @@ const moduleName = 'x'
 const entry = 'source/index.js'
 const script = process.env.script || 'start'
 
-if (script === 'start') console.log("Visit http://localhost:10001/example in a browser")
+if (script === 'start') console.info("Visit http://localhost:10001/example/ in a browser")
 
 const setup = {
 	
@@ -20,8 +20,8 @@ const setup = {
 		plugins: [
 			resolve(),
 			serve(),
-			livereload('bundle'),
-			babel({ exclude: 'node_modules/**' }),
+			livereload(),
+			babel(),
 		],
 	},
 	
@@ -30,22 +30,11 @@ const setup = {
 		moduleName,
 		targets: [{
 			format: 'iife',
-			dest: 'bundle/browser/x.js'
+			dest: 'bundle/browser/x.min.js'
 		}, {
 			format: 'cjs',
 			dest: 'bundle/CommonJS/index.js'
 		}],
-		plugins: [
-			resolve(),
-			babel(),
-		],
-	},
-	
-	uglify: {
-		entry,
-		moduleName,
-		format: 'iife',
-		dest: 'bundle/browser/x.min.js',
 		plugins: [
 			resolve(),
 			babel(),
