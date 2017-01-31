@@ -13,6 +13,13 @@ export const attributeHandlers = handleAttributes({
     key = toLowerCase(key[4]) + key.substr(5)
     node.dataset[key] = value
   },
+
+  on(node, key, value) {
+    node[key] = handle
+    function handle(event) {
+      value(event)
+    }
+  },
   
   viewBox: setAttribute,
   
@@ -22,3 +29,7 @@ export const attributeHandlers = handleAttributes({
   },
 
 })
+
+function eventHandler(event) {
+
+}

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "BABEL_ENV=bundle rollup -c --watch",
     "build": "BABEL_ENV=bundle rollup -c --environment script:build",
-    "test": "BABEL_ENV=test ava source/**/specs.js"
+    "test": "BABEL_ENV=test ava source/**/specs.js -v"
   },
   "repository": {
     "type": "git",
