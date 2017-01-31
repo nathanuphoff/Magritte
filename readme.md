@@ -4,7 +4,7 @@ A tiny reactive view library for the browser that relies on functional compositi
 
 Key features are API simplicity, functional composition, store immutability, and *very little* boilerplate. 
 
-[Give it a try on JSFiddle](https://jsfiddle.net/s110ax9g/)
+[Give it a try on JSFiddle](https://jsfiddle.net/s110ax9g/3/)
 
 To get started locally run `npm install` && `npm start`, then open [localhost:10001/example/](http://localhost:10001/example/) in your browser. This is not production ready.
 
@@ -20,8 +20,7 @@ To get started locally run `npm install` && `npm start`, then open [localhost:10
 
 ## Coming Soon™
 - A router,
-- A way to define an expected content structure for a component,
-- Component lifecycle methods (experimental status),
+- Component lifecycle methods (experimental),
 - Investigate JSX-compatibility (see x.element)
 
 ## Under Consideration...
@@ -62,9 +61,9 @@ A component can either be:
 
 In addition `null`, `true`, or `false` are valid as well:
 - Return `null` to remove an element from the DOM.
-- Return `true` to force-render the component again using the augmented virtual DOM.
+- Return `true` to force a re-render of the component using the augmented virtual DOM.
 - Return `false` to skip rendering for the component and leave it as is.
-
+- Return `undefined` to skip rendering for the component and leave it as is.
 
 ## Store
 The store is an object that is passed to every component function, its properties are `state` and `model`.
@@ -80,12 +79,10 @@ The `model` is a reflection of the state structure and will be passed to every f
 - An Array: this will only update the state if its value was initially an Array, a warning will be logged otherwise.
 - A string or number: this will only update the state if its value was initially a string or number, a warning will be logged otherwise.
 - A boolean: this will only update the state if its value was initially a boolean, a warning will be logged otherwise.
-- `undefined`: an update won’t be done and the component render method will not be initiated.
+- `undefined`: there will be no change, the component render method will not be initiated.
 - `null`: this renders the `component` using the state that it was initially given (not implemented yet).
 
 ## API
-
-The API is prone to change and incomplete.
 
 ### x
 
