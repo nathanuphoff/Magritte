@@ -293,8 +293,9 @@ function store(component, state, abstract) {
 
   var time = void 0; // global timestamo
   var model = createModel(state);
-
   abstract = component({ state: freezeModelToState(model), model: model }, abstract);
+
+  return freeze(model);
 
   function createModel(value, host, path) {
 
@@ -433,6 +434,12 @@ var attributeHandlers = handleAttributes({
   data: function data(node, key, value) {
     key = toLowerCase(key[4]) + key.substr(5);
     node.dataset[key] = value;
+  },
+  on: function on(node, key, value) {
+    node[key] = handle;
+    function handle(event) {
+      value(event);
+    }
   },
 
 

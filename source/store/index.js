@@ -7,9 +7,10 @@ import {
 export default function store(component, state, abstract) {
   
   let time // global timestamo
-  const model = createModel(state)
-  
+  const model = createModel(state)  
   abstract = component({ state: freezeModelToState(model), model }, abstract)
+
+  return freeze(model)
 
   function createModel(value, host, path) {
     
