@@ -1,4 +1,4 @@
-import { toLowerCase, functionType } from '../../_'
+import { toLowerCase, functionType, xlinkNameSpace } from '../../_'
 import { handleAttributes } from '../../component'
 import { setAttribute } from '../../document'
 
@@ -25,7 +25,7 @@ export const attributeHandlers = handleAttributes({
   
   xlink(node, key, value) {
     key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1:$2'))    
-    setAttribute(node, key, value, 'http://www.w3.org/1999/xlink')
+    setAttribute(node, key, value, xlinkNameSpace)
   },
 
 })

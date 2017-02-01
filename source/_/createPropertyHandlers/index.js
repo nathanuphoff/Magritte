@@ -1,17 +1,19 @@
+import { _Object } from '../_constants'
 import { assign } from '../assign'
+
+const methodsKey = 'm'
+const patternKey = 'p'
 
 export function createPropertyHandlers(defaultPattern) {
   
   const cache = {
-    methods: {},
-    pattern: defaultPattern, 
+    [methodsKey]: {},
   }
   
   return function(object) {
-    const methods = assign(cache.methods, object)
-    const keys = Object.keys(methods).join('|')
-    const pattern = keys ? new RegExp('^' + keys) : defaultPattern
-    return assign(cache, { methods, pattern })
+    const methods = assign(cache[methodsKey], object)
+    const pattern = new RegExp('^' + _Object.keys(methods).join('|'))
+    return assign(cache, { [methodsKey]: methods, [patternKey]: pattern })
   }
 
 }

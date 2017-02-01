@@ -1,16 +1,16 @@
 import { 
-  _null, _undefined, functionType, assign, slice, freeze, isPlainObject,
+  _null, _undefined, functionType, arrayKind, assign, freeze, isPlainObject,
   freezeModelToState, getStoreContentKind, testStoreContent,
 } from '../_'
 
 //
 export default function store(component, state, abstract) {
   
-  let time // global timestamo
+  let time // global timestamp
   const model = createModel(state)  
   abstract = component({ state: freezeModelToState(model), model }, abstract)
 
-  return freeze(model)
+  return model
 
   function createModel(value, host, path) {
     
@@ -33,14 +33,14 @@ export default function store(component, state, abstract) {
         assign(structure, { 
           next: value,
           last: _undefined,
-          initial: kind == 'Array' ? slice(value) : value,
+          null: kind == arrayKind ? [] : value,
           time,
           path,
           kind,
-          hasChanged
+          hasChanged,
         })
         
-        return assign(dispatch, structure)
+        return freeze(assign(dispatch, structure))
 
         function dispatch(next) {
 
@@ -51,12 +51,12 @@ export default function store(component, state, abstract) {
           while (typeof next == functionType) next = next(last)
 
           // reset the state of the value if ‘next’ equals null
-          if (next === _null) next = structure.initial
+          if (next === _null) next = structure.null
 
           // proceed to typechecking otherwise
           if (next !== _undefined && next !== last) {
             
-            // update the view if next is of the proper type...
+            // update the view if next has the proper content kind...
             if (testStoreContent[kind](next)) {
               
               const object = host[path]   
@@ -90,7 +90,7 @@ export default function store(component, state, abstract) {
       else contentWarning({ 
         value, 
         expected: 'content, boolean, or a list', 
-        received: getContentKind(value),
+        received: getStoreContentKind(value),
         path,
       })
       
@@ -101,7 +101,6 @@ export default function store(component, state, abstract) {
 }
 
 function contentWarning({ value, path, expected, received }) {
-  received = getStoreContentKind(value)
   console.warn("Value “" + value + "” provided to " + path + " is of the wrong kind:", {
     expected,
     received

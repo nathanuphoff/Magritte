@@ -142,9 +142,9 @@ var slicedToArray = function () {
   };
 }();
 
-var _contentTypes;
+var _contentKinds;
 
-var _Object = Object;
+var _Object$1 = Object;
 var _Array = Array;
 var _document = typeof document != 'undefined' ? document : {};
 var _isNaN = isNaN;
@@ -155,9 +155,9 @@ var objectType = 'object';
 var stringType = 'string';
 var numberType = 'number';
 
-var ArrayType = 'Array';
-var listType = 'list';
-var contentType = 'content';
+var arrayKind = 'Array';
+var contentKind = 'content';
+var listKind = 'list';
 
 var _undefined = undefined;
 var _null = null;
@@ -165,45 +165,44 @@ var _null = null;
 
 
 var emptyObject = {};
-var contentTypes = (_contentTypes = {}, defineProperty(_contentTypes, stringType, 1), defineProperty(_contentTypes, numberType, 1), _contentTypes);
+
+var contentKinds = (_contentKinds = {}, defineProperty(_contentKinds, stringType, 1), defineProperty(_contentKinds, numberType, 1), _contentKinds);
 
 var namespaces = {
   svg: 'http://www.w3.org/2000/svg'
 };
 
-function assign() {
+var assign = _Object$1.assign;
 
-	var data = arguments;
-	var result = data[0];
-	var length = data.length;
-	var index = 0;
+// export function assign() {
 
-	while (++index < length) {
-		var object = data[index];
-		for (var key in object) {
-			result[key] = object[key];
-		}
-	}
+// 	const data = arguments
+// 	const result = data[0]
+// 	const length = data.length
+// 	let index = 0
 
-	return result;
-}
+// 	while (++index < length) {
+// 		const object = data[index]
+// 		for (const key in object) result[key] = object[key]
+// 	}
 
+// 	return result
+
+// }
+
+var methodsKey = 'methods';
 function createPropertyHandlers(defaultPattern) {
 
-  var cache = {
-    methods: {},
-    pattern: defaultPattern
-  };
+  var cache = defineProperty({}, methodsKey, {});
 
   return function (object) {
-    var methods = assign(cache.methods, object);
-    var keys = Object.keys(methods).join('|');
-    var pattern = keys ? new RegExp('^' + keys) : defaultPattern;
+    var methods = assign(cache[methodsKey], object);
+    var pattern = new RegExp('^' + _Object$1.keys(methods).join('|'));
     return assign(cache, { methods: methods, pattern: pattern });
   };
 }
 
-var freeze = _Object.freeze;
+var freeze = _Object$1.freeze;
 
 function freezeModelToState(model) {
   var state = {};
@@ -222,7 +221,7 @@ function isContent(value) {
 
 function getStoreContentKind(value, type) {
   type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  if (isContent(value)) type = contentType;else if (isArray(value)) type = ArrayType;
+  if (isContent(value)) type = contentKind;else if (isArray(value)) type = arrayKind;
   return type;
 }
 
@@ -240,7 +239,7 @@ function slice(value) {
 
 var _testStoreContent;
 
-var testStoreContent = (_testStoreContent = {}, defineProperty(_testStoreContent, ArrayType, isArray), defineProperty(_testStoreContent, contentType, isContent), defineProperty(_testStoreContent, booleanType, isBoolean), _testStoreContent);
+var testStoreContent = (_testStoreContent = {}, defineProperty(_testStoreContent, arrayKind, isArray), defineProperty(_testStoreContent, contentKind, isContent), defineProperty(_testStoreContent, booleanType, isBoolean), _testStoreContent);
 
 function toLowerCase(value) {
   return value.toLowerCase(value);
@@ -291,7 +290,7 @@ var methods = Object.freeze({
 //
 function store(component, state, abstract) {
 
-  var time = void 0; // global timestamo
+  var time = void 0; // global timestamp
   var model = createModel(state);
   abstract = component({ state: freezeModelToState(model), model: model }, abstract);
 
@@ -324,12 +323,12 @@ function store(component, state, abstract) {
               while ((typeof next === 'undefined' ? 'undefined' : _typeof(next)) == functionType) {
                 next = next(last);
               } // reset the state of the value if ‘next’ equals null
-              if (next === _null) next = structure.initial;
+              if (next === _null) next = structure.null;
 
               // proceed to typechecking otherwise
               if (next !== _undefined && next !== last) {
 
-                // update the view if next is of the proper type...
+                // update the view if next has the proper content kind...
                 if (testStoreContent[kind](next)) {
 
                   var object = host[path];
@@ -359,7 +358,7 @@ function store(component, state, abstract) {
             assign(structure, {
               next: value,
               last: _undefined,
-              initial: kind == 'Array' ? slice(value) : value,
+              null: kind == arrayKind ? [] : value,
               time: time,
               path: path,
               kind: kind,
@@ -372,7 +371,7 @@ function store(component, state, abstract) {
           } else contentWarning({
             value: value,
             expected: 'content, boolean, or a list',
-            received: getContentKind(value),
+            received: getStoreContentKind(value),
             path: path
           });
         }();
@@ -388,7 +387,6 @@ function contentWarning(_ref) {
       expected = _ref.expected,
       received = _ref.received;
 
-  received = getStoreContentKind(value);
   console.warn("Value “" + value + "” provided to " + path + " is of the wrong kind:", {
     expected: expected,
     received: received
@@ -397,7 +395,6 @@ function contentWarning(_ref) {
 
 function resolveChild(content, store, type, kind, name) {
 
-  // const pipe = type === _undefined
   type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   while (type == functionType) {
     name = content.name;
@@ -405,16 +402,11 @@ function resolveChild(content, store, type, kind, name) {
     type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
   }
 
-  // const flow = pipes[type]
-
   if (type != booleanType) {
-    if (content == _null) content = _null;else if (!contentTypes[type] && _typeof(content[0]) == stringType) type = listType;
+    if (content == _null) content = _null;else if (contentKinds[type]) type = contentKind;else if (_typeof(content[0]) == stringType) type = listKind;
   }
 
   return [content, type, kind, name];
-  // return pipe && flow
-  //   ? distill(flow(content), store, type)
-  //   : [content, type, kind]
 }
 
 function setAttribute(node, key, value, namespace) {
@@ -520,9 +512,9 @@ function renderElement(parent, template, abstract, store, name, namespace) {
       _type = _transformChild2[1];
       kind = _transformChild2[2];
       _name = _transformChild2[3];
-    }if (contentTypes[_type]) {
+    }if (_type == contentKind) {
       vdom[index] = renderContent(node, content, child, store);
-    } else if (_type == listType) {
+    } else if (_type == listKind) {
       vdom[index] = renderElement(node, content, child, store, _name, namespace);
     } else if (_type == objectType) {
       vdom[index] = _null;

@@ -1,4 +1,4 @@
-import { _document, _null, listType, objectType, contentTypes, assign, namespaces, emptyObject } from '../../_'
+import { _document, _null, listKind, objectType, contentKind, assign, svgNameSpace, emptyObject } from '../../_'
 import { resolveChild } from '../../middleware'
 import { createElement } from '../createElement'
 import { renderContent } from '../renderContent'
@@ -9,7 +9,7 @@ const mount = _document.createEvent('Event').initEvent('mount', true, true)
 export function renderElement(parent, template, abstract, store, name, namespace) {
 
   const type = abstract.node === parent ? _null : template[0]
-  namespace = namespace || namespaces[type]
+  if (type === 'svg') namespace = svgNameSpace
 
   const createNode = abstract.name !== name || abstract.type !== type
   const node = createNode ? createElement(type, namespace) : abstract.node
@@ -26,10 +26,10 @@ export function renderElement(parent, template, abstract, store, name, namespace
     
     if (content === true) [content, type, kind, name] = transformChild(child.vdom)
 
-    if (contentTypes[type]) {
+    if (type == contentKind) {
       vdom[index] = renderContent(node, content, child, store)
     }
-    else if (type == listType) {
+    else if (type == listKind) {
       vdom[index] = renderElement(node, content, child, store, name, namespace)
     }
     else if (type == objectType) {
