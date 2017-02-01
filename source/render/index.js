@@ -1,12 +1,11 @@
+import { cache, freeze } from '../_'
 import { renderElement } from './renderElement'
 
-export default function(node, template) {
-  return function(store, abstract) {
-    return renderElement(node, template, abstract || {
-      node,
-      type: null,    
-      vdom: [],    
-      attributes: {},
-    }, store)
+export default function(node, template, abstract) {
+  
+  return function(store) {
+    abstract = renderElement(node, template, abstract, store)
+    return store
   }
+  
 }

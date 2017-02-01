@@ -260,43 +260,42 @@ function element() {
 var handleAttributes = createPropertyHandlers(/(?!)/);
 
 // under construction
-function route() {
-  var parameters = arguments;
-  return function (template) {
-    return template;
-  };
-}
 
 // under construction
-function structure(assert) {
-
-	return function (template) {
-		return function (data, b, c, d, e, f) {
-			return template(data, b, c, d, e, f);
-		};
-	};
-}
 
 // Public API methods
 
+function resolveChild(content, store, type, kind, name) {
 
-var methods = Object.freeze({
-	compose: compose,
-	element: element,
-	handleAttributes: handleAttributes,
-	route: route,
-	structure: structure
-});
+  // const pipe = type === _undefined
+  type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
+  while (type == functionType) {
+    name = content.name;
+    content = content(store);
+    type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
+  }
+
+  // const flow = pipes[type]
+
+  if (type != booleanType) {
+    if (content == _null) content = _null;else if (!contentTypes[type] && _typeof(content[0]) == stringType) type = listType;
+  }
+
+  return [content, type, kind, name];
+  // return pipe && flow
+  //   ? distill(flow(content), store, type)
+  //   : [content, type, kind]
+}
 
 //
-function store(component, state, abstract) {
+function createStore(component, state) {
 
   var time = void 0; // global timestamo
-  var model = createModel(state);
+  var model = createStoreModel(state);
 
-  abstract = component({ state: freezeModelToState(model), model: model }, abstract);
+  return component({ state: freezeModelToState(model), model: model });
 
-  function createModel(value, host, path) {
+  function createStoreModel(value, host, path) {
 
     var structure = {};
 
@@ -304,7 +303,7 @@ function store(component, state, abstract) {
     if (isPlainObject(value)) {
       for (var key in value) {
         var location = path ? path + '.' + key : key;
-        structure[key] = createModel(value[key], structure, location);
+        structure[key] = createStoreModel(value[key], structure, location);
       }
       return structure;
     }
@@ -316,7 +315,6 @@ function store(component, state, abstract) {
           if (kind) {
             var dispatch = function dispatch(next) {
 
-              var start = performance.now();
               var last = structure.next;
 
               // resolve callback into value using the current value
@@ -337,9 +335,7 @@ function store(component, state, abstract) {
                   assign(object, { next: next, last: last, time: time });
                   assign(structure, object);
 
-                  abstract = component({ state: freezeModelToState(model), model: model }, abstract);
-
-                  console.log(performance.now() - start);
+                  return component({ state: freezeModelToState(model), model: model });
                 }
                 // ...or log a warning otherwise
                 else contentWarning({
@@ -392,28 +388,6 @@ function contentWarning(_ref) {
     expected: expected,
     received: received
   });
-}
-
-function resolveChild(content, store, type, kind, name) {
-
-  // const pipe = type === _undefined
-  type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
-  while (type == functionType) {
-    name = content.name;
-    content = content(store);
-    type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
-  }
-
-  // const flow = pipes[type]
-
-  if (type != booleanType) {
-    if (content == _null) content = _null;else if (!contentTypes[type] && _typeof(content[0]) == stringType) type = listType;
-  }
-
-  return [content, type, kind, name];
-  // return pipe && flow
-  //   ? distill(flow(content), store, type)
-  //   : [content, type, kind]
 }
 
 function setAttribute(node, key, value, namespace) {
@@ -546,14 +520,11 @@ function renderElement(parent, template, abstract, store, name, namespace) {
   return { node: node, type: type, vdom: vdom, name: name, attributes: attributes };
 }
 
-var render = function (node, template) {
-  return function (store, abstract) {
-    return renderElement(node, template, abstract || {
-      node: node,
-      type: null,
-      vdom: [],
-      attributes: {}
-    }, store);
+var render = function (node, template, abstract) {
+
+  return function (store) {
+    abstract = renderElement(node, template, abstract, store);
+    return store;
   };
 };
 
@@ -561,14 +532,24 @@ function factory() {
 
   var template = arguments;
   return function (selector, state, abstract) {
-    var root = _document.querySelector(selector);
-    root.innerHTML = "";
-    var component = render(root, template);
-    return store(component, state, abstract);
+
+    var node = _document.querySelector(selector);
+    node.innerHTML = ""; // todo: create initial abstract DOM tree from node.childNodes
+
+    var component = render(node, template, {
+      node: node,
+      type: null,
+      vdom: [],
+      attributes: {}
+    });
+
+    var store = createStore(component, state);
+
+    return component(store).model;
   };
 }
 
-var index = assign(factory, methods);
+var index = assign(factory, { compose: compose, element: element, handleAttributes: handleAttributes });
 
 return index;
 
