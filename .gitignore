@@ -1,3 +1,7 @@
-node_modules
-*.log
+bundle/index.js
+example/magritte.js
 documentation
+node_modules
+
+*.log
+.DS_Store

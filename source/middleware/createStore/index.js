@@ -39,7 +39,7 @@ export function createStore(component, state) {
           hasChanged,
         })
         
-        return freeze(assign(dispatch, structure))
+        return assign(dispatch, structure)
 
         function dispatch(next) {
           

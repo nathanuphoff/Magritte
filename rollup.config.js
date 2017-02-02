@@ -16,7 +16,7 @@ const setup = {
 		entry,
 		moduleName,
 		format: 'iife',
-		dest: 'example/assets/x.js',
+		dest: 'example/magritte.js',
 		plugins: [
 			resolve(),
 			serve(),
@@ -30,15 +30,14 @@ const setup = {
 		moduleName,
 		targets: [{
 			format: 'iife',
-			dest: 'bundle/browser/x.min.js'
+			dest: 'bundle/magritte.js'
 		}, {
 			format: 'cjs',
-			dest: 'bundle/CommonJS/index.js'
+			dest: 'bundle/index.js'
 		}],
 		plugins: [
 			resolve(),
 			babel(),
-			uglify(),
 		],
 	},
 	

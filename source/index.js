@@ -17,10 +17,8 @@ function factory() {
       vdom: [],
       attributes: {},
     })
-    
-    const store = createStore(component, state)
-    
-    return component(store).model
+        
+    return createStore(component, state).model
     
   }
 

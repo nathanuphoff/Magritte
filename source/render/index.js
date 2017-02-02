@@ -1,4 +1,3 @@
-import { cache, freeze } from '../_'
 import { renderElement } from './renderElement'
 
 export default function(node, template, abstract) {

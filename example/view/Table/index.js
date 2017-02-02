@@ -10,21 +10,16 @@ const size = {
 const TableEvents = model => ({
 
   deleteRow: index => event => {
-    // dispatch({ table: removeAtIndex(index)(state.table) }) -> depricated
     model.table(removeAtIndex(index))
   },
 
   updateNthRow: n => event => {
 
-    // in this example ‘updateNthItem’ is expected to be defined elsewhere
+    // updateNthItem is expected to be defined elsewhere
     const updateNthItem = n => map((item, index) => {
       if (index % n < 1) item.text += '!'
       return item
     })
-
-    // if (table.length) {
-    //   dispatch({ table: map(updateNthItem)(state.table) }) -> depricated
-    // }
 
     model.table(updateNthItem(n))
 
@@ -32,27 +27,19 @@ const TableEvents = model => ({
 
   selectRow: id => event => {
     event.preventDefault()    
-    // if (id !== state.selected) dispatch({ selected: id }) -> depricated
     model.selected(id)
   },
 
   deleteAll: event => {
-    // const { table } = state -> now obsolete
-    // if (table.length) dispatch({ table: [] }) -> depricated
     model.table(null) // null resets table to its initial state
   },
 
   createNumberOfRows: amount => event => {
-    // dispatch({ table: createTableRows(amount) }) -> depricated
     model.table(createTableRows(amount))
   },
 
   addNumberOfRows: amount => event => {
-
-    // const table = state.table.concat(createTableRows(amount)) -> now obsolete
-    // dispatch({ table }) ->depricated
-
-    // in this example ‘concat’ is expected to be defined elsewhere
+    // concat is expected to be defined elsewhere
     const concat = data => array => array.concat(data)
     model.table(concat(createTableRows(amount)))
 
@@ -60,16 +47,6 @@ const TableEvents = model => ({
 
   swapRows: event => {
 
-    // const { table } = state -> now obsolete
-    // if (table.length) {
-    //   var a = table[4]
-    //   table[4] = table[8]
-    //   table[8] = a
-    //   dispatch({ table }) -> depricated
-    // }
-
-    // the above would require a deep compare to attest wheter a change was made (bad)
-    // let’s refactore:
     const swapArrayValues = (a, b) => array => {
       const result = array.slice()
       result[a] = array[b]
@@ -77,8 +54,7 @@ const TableEvents = model => ({
       return result
     }
 
-     model.table(swapArrayValues(4, 8)) 
-    // now a new array is dispatched which allows for referential comparison
+    model.table(swapArrayValues(4, 8)) 
 
   },
 
@@ -131,7 +107,7 @@ const removeLabel = testSVG
 const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
 
   const { selectRow, deleteRow, onmount } = events
-  const className = selected === id ? 'danger' : ''
+  const className = selected === id ? 'danger' : '' 
 
   return [ 'tr', { className },
     [ 'td', { className: 'id' }, id], 

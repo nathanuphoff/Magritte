@@ -29,7 +29,3 @@ export const attributeHandlers = handleAttributes({
   },
 
 })
-
-function eventHandler(event) {
-
-}

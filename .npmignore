@@ -1,0 +1,11 @@
+bundle/magritte.js
+documentation
+example
+source
+documentation
+node_modules
+
+*.log
+.gitignore
+.DS_Store
+rollup.config.js

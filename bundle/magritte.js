@@ -1,4 +1,3 @@
-document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
 var x = (function () {
 'use strict';
 
@@ -32,22 +31,6 @@ var _pattern_ = 'p';
 var _methods_ = 'm';
 
 var assign = _Object$1.assign;
-
-// export function assign() {
-
-// 	const data = arguments
-// 	const result = data[0]
-// 	const length = data.length
-// 	let index = 0
-
-// 	while (++index < length) {
-// 		const object = data[index]
-// 		for (const key in object) result[key] = object[key]
-// 	}
-
-// 	return result
-
-// }
 
 function createPropertyHandlers(cache) {
 
@@ -255,10 +238,6 @@ function element() {
 
 var handleAttributes = createPropertyHandlers({});
 
-// under construction
-
-// under construction
-
 // Public API methods
 
 function resolveChild(content, store, type, kind, name) {
@@ -277,6 +256,7 @@ function resolveChild(content, store, type, kind, name) {
   return [content, type, kind, name];
 }
 
+//
 function createStore(component, state) {
 
   var time = void 0; // global timestamo
@@ -536,8 +516,6 @@ function factory() {
       vdom: [],
       attributes: {}
     });
-
-    // const store = createStore(component, state)
 
     return createStore(component, state).model;
   };
