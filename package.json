@@ -1,8 +1,8 @@
 {
-  "name": "x",
+  "name": "magritte",
   "version": "0.0.2",
   "description": "A fast and simple reactive view library for the browser",
-  "main": "source/index.js",
+  "main": "bundle/index.js",
   "scripts": {
     "start": "BABEL_ENV=bundle rollup -c --watch",
     "build": "BABEL_ENV=bundle rollup -c --environment script:build",

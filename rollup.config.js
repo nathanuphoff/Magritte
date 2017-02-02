@@ -4,7 +4,7 @@ import serve from 'rollup-plugin-serve'
 import babel from 'rollup-plugin-babel'
 import uglify from 'rollup-plugin-uglify'
 
-const moduleName = 'x'
+const moduleName = 'magritte'
 const entry = 'source/index.js'
 const script = process.env.script || 'start'
 
