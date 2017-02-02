@@ -1,5 +1,5 @@
 'use strict'
-const model = {
+const state = {
   metadata: {
     author: "Nathan Uphoff",
   },

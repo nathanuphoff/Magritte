@@ -23,5 +23,3 @@ export const emptyObject = {}
 export const w3Domain = 'http://www.w3.org/'
 export const svgNameSpace = w3Domain + '2000/svg'
 export const xlinkNameSpace = w3Domain + '1999/xlink'
-
-

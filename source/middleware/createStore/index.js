@@ -1,18 +1,17 @@
 import { 
   _null, _undefined, functionType, arrayKind, assign, freeze, isPlainObject,
   freezeModelToState, getStoreContentKind, testStoreContent,
-} from '../_'
+} from '../../_'
 
 //
-export default function store(component, state, abstract) {
+export function createStore(component, state) {
+    
+  let time // global timestamo
+  const model = createStoreModel(state)
   
-  let time // global timestamp
-  const model = createModel(state)  
-  abstract = component({ state: freezeModelToState(model), model }, abstract)
+  return component({ state: freezeModelToState(model), model })
 
-  return model
-
-  function createModel(value, host, path) {
+  function createStoreModel(value, host, path) {
     
     const structure = {}
     
@@ -20,7 +19,7 @@ export default function store(component, state, abstract) {
     if (isPlainObject(value)) {
       for (const key in value) {
         const location = path ? path + '.' + key : key
-        structure[key] = createModel(value[key], structure, location)
+        structure[key] = createStoreModel(value[key], structure, location)
       }
       return structure
     }
@@ -43,8 +42,7 @@ export default function store(component, state, abstract) {
         return freeze(assign(dispatch, structure))
 
         function dispatch(next) {
-
-          const start = performance.now()          
+          
           const last = structure.next
 
           // resolve callback into value using the current value
@@ -65,9 +63,7 @@ export default function store(component, state, abstract) {
               assign(object, { next, last, time })
               assign(structure, object)
 
-              abstract = component({ state: freezeModelToState(model), model }, abstract)
-
-              console.log(performance.now() - start)
+              return component({ state: freezeModelToState(model), model })
 
             }
             // ...or log a warning otherwise
