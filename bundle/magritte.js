@@ -1,4 +1,4 @@
-var x = (function () {
+var magritte = (function () {
 'use strict';
 
 var _Object$1 = Object;
