@@ -1,3 +1,3 @@
-export function slice(value) {
-  return [].slice.call(value, 0)
+export function slice(value, start, end) {
+  return [].slice.call(value, start, end)
 }

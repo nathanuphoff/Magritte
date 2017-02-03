@@ -2,6 +2,6 @@
 
 const { createTableRows, removeAtIndex } = controller
 
-const render = magritte(Table)
+const render = magritte('#root', Table)
 
-render('#root', state)
+render(state)

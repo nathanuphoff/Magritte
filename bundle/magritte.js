@@ -213,8 +213,8 @@ function isPlainObject(value) {
   return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) != stringType && value == '[object Object]';
 }
 
-function slice(value) {
-  return [].slice.call(value, 0);
+function slice(value, start, end) {
+  return [].slice.call(value, start, end);
 }
 
 var _testStoreContent;
@@ -499,10 +499,10 @@ var render = function (node, template, abstract) {
   };
 };
 
-function factory() {
+function factory(selector) {
 
-  var template = arguments;
-  return function (selector, state, abstract) {
+  var template = slice(arguments, 1);
+  return function (state) {
 
     var node = _document.querySelector(selector);
     node.innerHTML = ""; // todo: create initial abstract DOM tree from node.childNodes

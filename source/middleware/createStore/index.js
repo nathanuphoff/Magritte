@@ -5,7 +5,7 @@ import {
 
 //
 export function createStore(component, state) {
-    
+  
   let time // global timestamo
   const model = createStoreModel(state)
   

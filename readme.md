@@ -7,7 +7,7 @@ Key features are API simplicity, functional composition, store immutability, and
 ## Getting Started
 `npm install magritte` or download `bundle/magritte.js` to use it straight away. Magritte including its template syntax is plain JavaScript and can be used without any build pipeline.
 
-[Demo on JSFiddle](https://jsfiddle.net/s110ax9g/3/)
+[Demo on JSFiddle](https://jsfiddle.net/s110ax9g/4/)
 
 > Beware that Magritte should not be used in production at this time.
 
@@ -42,25 +42,22 @@ You’ll need a root element,
 
 a component,
 ```javascript
-const events = model => ({
-	onclick: event => model.name('Jane')
-})
-
-const Title = ({ state, model }) => ['h1', events(model), `Hello ${state.name}!`]
+const Title = ({ state, model }) => 
+	['h1', { onclick: event => model.name('Jane') }, `Hello ${state.name}!`]
 ```
 
-an initial state,
+a store model with the initial state,
 ```javascript
-const initialState = { name: 'World' }
+const storeModel = { name: 'World' }
 ```
 
 and some composition...
 ```javascript
-// create a component
-const component = magritte(Title) 
+// create a component with a DOM selector and your root components
+const component = magritte('#root', Title) 
 
-// and mount it to the #root element using the initialState
-component('#root', initialState) 
+// and render the component using the storeModel
+component(storeModel) 
 ```
 
 ## Component
@@ -100,12 +97,12 @@ The `model` is a reflection of the state structure and will be passed to every f
 Magritte is a function that accepts any number of components, passing components returns another function that accepts a query-selector and the initial state.
 
 ```javasript
-const component = x(One, Two, Three)
-
 const selector = '#root'
-const state = { greeting: "Hello Operator!" }
+const render = magritte(selector, One, Two, Three)
 
-component(selector, state)
+const storeModel = { greeting: "Hello Operator!" }
+
+component(storeModel)
 ```
 
 ### #compose
