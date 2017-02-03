@@ -271,10 +271,8 @@ function createStore(component, state) {
     // plain objects form the layout of the model
     if (isPlainObject(value)) {
       for (var key in value) {
-        var location = path ? path + '.' + key : key;
-        structure[key] = createStoreModel(value[key], structure, location);
-      }
-      return structure;
+        structure[key] = createStoreModel(value[key], structure, key);
+      }return structure;
     }
     // other types of values are considered content
     else {
@@ -392,10 +390,9 @@ var attributeHandlers = handleAttributes({
   }
 });
 
-var elementCache = {};
 function createElement(type, namespace) {
 
-	return elementCache[type] = (elementCache[type] ? elementCache[type] : namespace ? _document.createElementNS(namespace, type) : _document.createElement(type)).cloneNode(false);
+	return namespace ? _document.createElementNS(namespace, type) : _document.createElement(type);
 }
 
 function renderContent(parent, content, abstract, store) {

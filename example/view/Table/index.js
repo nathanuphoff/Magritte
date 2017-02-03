@@ -53,19 +53,19 @@ const TableEvents = model => ({
       result[b] = array[a]
       return result
     }
-
-    model.table(swapArrayValues(4, 8)) 
-
+    
+    model.table(swapArrayValues(4, 8))
+    
   },
 
 })
 
 // Table component
 const Table = ({ state, model }) => {
-
+  
   const { table, selected } = model
   if (table.hasChanged() || selected.hasChanged()) {
-
+    
     const { title, table, selected } = state
     const events = TableEvents(model)
     const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
@@ -108,7 +108,7 @@ const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
 
   const { selectRow, deleteRow, onmount } = events
   const className = selected === id ? 'danger' : '' 
-
+  
   return [ 'tr', { className },
     [ 'td', { className: 'id' }, id], 
     [ 'td', { className: 'item' },

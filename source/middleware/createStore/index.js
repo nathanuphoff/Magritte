@@ -17,10 +17,7 @@ export function createStore(component, state) {
     
     // plain objects form the layout of the model
     if (isPlainObject(value)) {
-      for (const key in value) {
-        const location = path ? path + '.' + key : key
-        structure[key] = createStoreModel(value[key], structure, location)
-      }
+      for (const key in value) structure[key] = createStoreModel(value[key], structure, key)
       return structure
     }
     // other types of values are considered content
