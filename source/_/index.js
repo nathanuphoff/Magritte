@@ -1,6 +1,7 @@
 export * from './_constants'
 
 export { assign } from './assign'
+export { concat } from './concat'
 export { createPropertyHandlers } from './createPropertyHandlers'
 export { freeze } from './freeze'
 export { freezeModelToState } from './freezeModelToState'

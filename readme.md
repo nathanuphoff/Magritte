@@ -4,16 +4,10 @@ A tiny reactive view library for the browser that relies on functional compositi
 
 Key features are API simplicity, functional composition, store immutability, and *very little* boilerplate. 
 
-## Getting Started
-`npm install magritte` or download `bundle/magritte.js` to use it straight away. Magritte including its template syntax is plain JavaScript and can be used without any build pipeline.
-
-[Demo on JSFiddle](https://jsfiddle.net/s110ax9g/4/)
-
-> Beware that Magritte should not be used in production at this time.
-
 ## Features
 - JSONML template syntax,
-- A DOM abstraction with incremental rendering,
+- New: JSX Compatible,
+- A virtual DOM abstraction and incremental updates,
 - A built in immutable store with a one-directional data flow,
 - Full SVG support including xlink-attributes,
 - Element attribute middleware,
@@ -23,8 +17,7 @@ Key features are API simplicity, functional composition, store immutability, and
 
 ## Coming Soon™
 - A router,
-- Component lifecycle methods,
-- Investigate JSX-compatibility (see magritte.element)
+- Component lifecycle methods.
 
 ## Roadmap...
 - Isomorphic rendering,
@@ -32,8 +25,14 @@ Key features are API simplicity, functional composition, store immutability, and
 - Performance tests,
 - Full documentation.
 
+## Getting Started
+`npm install magritte` or download `bundle/magritte.js` to use it straight away. Magritte including its template syntax is plain JavaScript and can be used without any build pipeline.
 
-## Hello World!
+[Demo on JSFiddle](https://jsfiddle.net/s110ax9g/4/)
+
+> Beware that Magritte should not be used in production at this time.
+
+### Hello World!
 
 You’ll need a root element,
 ```html
@@ -60,7 +59,7 @@ const component = magritte('#root', Title)
 component(storeModel) 
 ```
 
-## Component
+## Components
 A component can either be:
 - A function: functions are resolved using the `store` as its arguments,
 - A plain attributes-Object: `{ className: 'hello' }`,
@@ -93,8 +92,8 @@ The `model` has a structure derived from the `storeModel` that was passed to the
 
 ## API
 ### magritte
+Magritte is a function that accepts any number of components, the first argument however is expected to be a document query selector. After declaring the component it can be rendered using a storeModel that acts as the initial state, and the entire data structure of the component.
 
-Magritte is a function that accepts any number of components, the first argument however is expected to be a DOM selector. After declaring the component it can be rendered using a storeModel that acts as the initial state, and the entire data structure of the component.
 ```javasript
 const render = magritte('#root', One, Two, Three)
 
@@ -152,3 +151,8 @@ With handleAttributes you can define middleware that is responsible for setting 
 
 ### #route
 Not implemented yet, will be used to define routed components.
+
+### #jsx
+Magritte can now be used with JSX (experimental), to do this use a Babel JSX plugin and set its pragma option to `'magritte.jsx'`. 
+
+> Component child functions are no longer resolved using the `store` automatically, you can use jsx-props instead: `<Component item={item}/>` which passes an Object with an `item` property to a child component as usual.

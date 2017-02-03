@@ -1,5 +1,5 @@
 import { _document, assign, slice } from './_'
-import { compose, element, handleAttributes } from './component'
+import { compose, element, handleAttributes, jsx } from './component'
 import { createStore } from './middleware'
 import render from './render'
 
@@ -24,4 +24,4 @@ function factory(selector) {
 
 }
 
-export default assign(factory, { compose, element, handleAttributes })
+export default assign(factory, { compose, element, handleAttributes, jsx })

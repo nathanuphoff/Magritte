@@ -32,6 +32,10 @@ var _methods_ = 'm';
 
 var assign = _Object$1.assign;
 
+function concat(array, addition) {
+	return array.concat(addition);
+}
+
 function createPropertyHandlers(cache) {
 
   return function (object) {
@@ -228,7 +232,7 @@ function toLowerCase(value) {
 function compose() {
   var base = slice(arguments);
   return function () {
-    return base.concat(slice(arguments));
+    return concat(base, slice(arguments));
   };
 }
 
@@ -237,6 +241,16 @@ function element() {
 }
 
 var handleAttributes = createPropertyHandlers({});
+
+function jsx$1(tag, attributes, children) {
+
+	if (children) {
+		var firstChild = children[0];
+		if (_typeof(firstChild[0]) != stringType) children = firstChild;
+	}
+
+	return concat([tag, attributes], children);
+}
 
 // Public API methods
 
@@ -518,7 +532,7 @@ function factory(selector) {
   };
 }
 
-var index = assign(factory, { compose: compose, element: element, handleAttributes: handleAttributes });
+var index = assign(factory, { compose: compose, element: element, handleAttributes: handleAttributes, jsx: jsx$1 });
 
 return index;
 

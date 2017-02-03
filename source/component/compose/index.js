@@ -1,8 +1,8 @@
-import { slice } from '../../_'
+import { slice, concat } from '../../_'
 
 export function compose() {
   const base = slice(arguments)
   return function() {
-    return base.concat(slice(arguments))
+    return concat(base, slice(arguments))
   }
 }
