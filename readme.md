@@ -94,11 +94,9 @@ The `model` is structure is derived from the `storeModel` that was passed to the
 ## API
 ### magritte
 
-Magritte is a function that accepts any number of components, passing components returns another function that accepts a query-selector and the initial state.
-
+Magritte is a function that accepts any number of components, the first argument however is expected to be a DOM selector. After declaring the component it can be rendered using a storeModel that acts as the initial state, and the entire data structure of the component.
 ```javasript
-const selector = '#root'
-const render = magritte(selector, One, Two, Three)
+const render = magritte('#root', One, Two, Three)
 
 const storeModel = { greeting: "Hello Operator!" }
 
