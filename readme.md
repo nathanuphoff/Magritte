@@ -4,9 +4,12 @@ A tiny reactive view library for the browser that relies on functional compositi
 
 Key features are API simplicity, functional composition, store immutability, and *very little* boilerplate. 
 
-[Give it a try on JSFiddle](https://jsfiddle.net/s110ax9g/3/)
+## Getting Started
+`npm install magritte` or download `bundle/magritte.js` to use it straight away. Magritte including its template syntax is plain JavaScript and can be used without any build pipeline.
 
-To get started locally run `npm install` && `npm start`, then open [localhost:10001/example/](http://localhost:10001/example/) in your browser. This is not production ready.
+[Demo on JSFiddle](https://jsfiddle.net/s110ax9g/3/)
+
+> Beware that Magritte should not be used in production at this time.
 
 ## Features
 - JSONML template syntax,
@@ -16,7 +19,7 @@ To get started locally run `npm install` && `npm start`, then open [localhost:10
 - Element attribute middleware,
 - A functional interface,
 - No build pipeline required,
-- Give or take 5Kb in size (2Kb gzipped).
+- A mere 5Kb in size (2Kb gzipped).
 
 ## Coming Soon™
 - A router,
