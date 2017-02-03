@@ -77,13 +77,13 @@ In addition `null`, `true`, or `false` are valid as well:
 The store is an object that is passed to every component function, its properties are `state` and `model`.
 
 ### state
-The state is a frozen object (no property reassignment) that keeps track of the application state. Supported data types are the same as those of JSON; null, a string, a number, an Array, or a child object. The state is a reflection of the state/model that was initially passed at component initialisation, this model should provide the data structure for the entire lifecycle of the application (see example/model). 
+The state is a frozen object (no property reassignment) that keeps track of the application state. Supported data types are the same as those of JSON; null, a string, a number, an Array, or a child Object. The state is a reflection of the `storeModel` that was initially passed at component initialisation, this model should provide the data structure for the entire lifecycle of the application (see `./example/model`).
 
 > By defining the model beforehand the developer is sure to abide to an existing data structure (no runtime changes) which at the same time has been documented as well.
 
 ### model
-The `model` is a reflection of the state structure and will be passed to every functional component, its dispatch methods accept either:
-- A function: functions are resolved using the current state value and the entire state object as its arguments, its return value is used to update the DOM.
+The `model` is structure is derived from the `storeModel` that was passed to the component at its first render and will be passed to every function in a component, its update-methods accept either:
+- A function: functions are resolved using the current value in the state and the entire state Object as its arguments, its return value is used to update the store and DOM if the state has changed.
 - An Array: this will only update the state if its value was initially an Array, a warning will be logged otherwise.
 - A string or number: this will only update the state if its value was initially a string or number, a warning will be logged otherwise.
 - A boolean: this will only update the state if its value was initially a boolean, a warning will be logged otherwise.
