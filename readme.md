@@ -82,7 +82,7 @@ The state is a frozen object (no property reassignment) that keeps track of the 
 > By defining the model beforehand the developer is sure to abide to an existing data structure (no runtime changes) which at the same time has been documented as well.
 
 ### model
-The `model` is structure is derived from the `storeModel` that was passed to the component at its first render and will be passed to every function in a component, its update-methods accept either:
+The `model` has a structure derived from the `storeModel` that was passed to the component at its first render and will be passed to every function in a component, its update-methods accept either:
 - A function: functions are resolved using the current value in the state and the entire state Object as its arguments, its return value is used to update the store and DOM if the state has changed.
 - An Array: this will only update the state if its value was initially an Array, a warning will be logged otherwise.
 - A string or number: this will only update the state if its value was initially a string or number, a warning will be logged otherwise.
