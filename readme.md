@@ -60,16 +60,16 @@ component(storeModel)
 
 ## Components
 A component can be a:
-- __`function`__: functions are resolved using the `store` as its arguments,
-- __`string`__ or __`number`__: `'abc'` or `123`,
-- an __`Object`__: `{ className: 'hello' }`,
-- or an __`Array` template__: `['tagName', <child component>, <child component>, ...]`.
+- __function__: functions are resolved using the `store` as its arguments,
+- __string__ or __`number`__: `'abc'` or `123`,
+- an __Object__: `{ className: 'hello' }`,
+- or an __Array template__: `['tagName', <child component>, <child component>, ...]`.
 
 In addition `null`, `true`, `false`, or `undefined` are valid as well:
-- __`null`__: remove an element from the DOM,
-- __`true`__: force a re-render of the component using the augmented virtual DOM,
-- __`false`__: skip rendering for the component and leave it as is,
-- __`undefined`__: skip rendering for the component and leave it as is.
+- __null__: remove an element from the DOM,
+- __true__: force a re-render of the component using the augmented virtual DOM,
+- __false__: skip rendering for the component and leave it as is,
+- __undefined__: skip rendering for the component and leave it as is.
 
 ## Store
 The store is an Object that is passed to every component function, its properties are `state` and `model`.
