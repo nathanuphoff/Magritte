@@ -5,7 +5,7 @@ Magritte has a built in store model that provides an immutable state and a model
 
 ## Features
 - __fast__: a virtual DOM abstraction with incremental updates
-- __safe__: an immutable one-directional data store that prevents run-time changes to its structure
+- __safe__: an immutable one-directional data flow that prevents run-time changes to its structure
 - __linguistic__: supports JSONML (default), hyperscript, *and* JSX template syntax
 - __flexible__: attribute middleware and full SVG support including xlink-attributes
 - __expressive__: A functional interface that favours composition
