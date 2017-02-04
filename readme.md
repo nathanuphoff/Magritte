@@ -1,7 +1,7 @@
 # Magritte
 A tiny reactive view library for the browser with a functional interface and a DOM abstraction that allows incremental rendering. Key features include API simplicity, functional composition, store immutability, and *very little* boilerplate.
 
-Magritte has a built in store model that provides an immutable state and a model dispatcher. The store dispatcher has a type-check mechanism that prevents runtime changes to the ‘kind of content’ in the state. Components that utilise functional composition are resolved using the store which means your state and model are available in every component. The store
+Magritte has a built in store model that provides an immutable state and a model dispatcher. The store dispatcher has a type-check mechanism that prevents runtime changes to the ‘kind of content’ in the state. Components that utilise functional composition are resolved using the store which means your state and model are available in every component.
 
 ## Features
 - __fast__: a virtual DOM abstraction with incremental updates
@@ -68,6 +68,8 @@ In addition `null`, `true`, or `false` are valid as well:
 
 ## Store
 The store is an object that is passed to every component function, its properties are `state` and `model`.
+
+For a more detailed explanation and example see [./example/store/](https://github.com/nathanuphoff/Magritte/blob/master/example/model/index.js).
 
 ### state
 The state is a frozen object (no property reassignment) that keeps track of the application state. Supported data types are the same as those of JSON; null, a string, a number, an Array, or a child Object. The state is a reflection of the `storeModel` that was initially passed at component initialisation, this model should provide the data structure for the entire lifecycle of the application (see `./example/model`).
