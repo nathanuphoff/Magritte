@@ -1,53 +1,6 @@
 var magritte = (function () {
 'use strict';
 
-var _Object$1 = Object;
-var _Array = Array;
-var _document = typeof document != 'undefined' ? document : {};
-var _isNaN = isNaN;
-
-var functionType = 'function';
-var booleanType = 'boolean';
-var objectType = 'object';
-var stringType = 'string';
-var numberType = 'number';
-
-var arrayKind = 'Array';
-var contentKind = 'content';
-var listKind = 'list';
-
-var _undefined = undefined;
-var _null = null;
-
-
-
-var emptyObject = {};
-
-var w3Domain = 'http://www.w3.org/';
-var svgNameSpace = w3Domain + '2000/svg';
-var xlinkNameSpace = w3Domain + '1999/xlink';
-
-var _pattern_ = 'p';
-var _methods_ = 'm';
-
-var assign = _Object$1.assign;
-
-function concat(array, addition) {
-	return array.concat(addition);
-}
-
-function createPropertyHandlers(cache) {
-
-  return function (object) {
-    var methods = assign(cache[_methods_] || {}, object);
-    cache[_methods_] = methods;
-    cache[_pattern_] = new RegExp('^' + _Object$1.keys(methods).join('|'));
-    return cache;
-  };
-}
-
-var freeze = _Object$1.freeze;
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -150,71 +103,91 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
-var slicedToArray = function () {
-  function sliceIterator(arr, i) {
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
+function getType(value) {
+	return typeof value === "undefined" ? "undefined" : _typeof(value);
+}
 
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
+var name = 'Magritte';
 
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"]) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }
+var _Object$1 = Object;
+var _Array = Array;
+var _document = typeof document != 'undefined' ? document : {};
+var _isNaN = isNaN;
+var _console = console;
+var warn = _console.warn;
+var error$1 = _console.error;
+var functionType = getType(getType);
+var booleanType = getType(!0);
+var objectType = getType({});
+var stringType = getType('');
+var numberType = getType(0);
 
-    return _arr;
-  }
+var listKind = 'list';
+var booleanKind = 'a ' + booleanType;
+var arrayKind = 'an Array';
+var contentKind = 'a ' + stringType + ' or ' + numberType;
+var modelValues = ['null', contentKind, booleanKind, 'or ' + arrayKind].join(', ');
 
-  return function (arr, i) {
-    if (Array.isArray(arr)) {
-      return arr;
-    } else if (Symbol.iterator in Object(arr)) {
-      return sliceIterator(arr, i);
-    } else {
-      throw new TypeError("Invalid attempt to destructure non-iterable instance");
-    }
+var _undefined = undefined;
+var _null = null;
+var _true = true;
+
+
+var emptyObject = {};
+
+var w3Domain = 'http://www.w3.org/';
+var svgNameSpace = w3Domain + '2000/svg';
+var xlinkNameSpace = w3Domain + '1999/xlink';
+
+var _pattern_ = 'p';
+var _methods_ = 'm';
+
+var assign = _Object$1.assign;
+
+function concat(array, addition) {
+	return array.concat(addition);
+}
+
+function createPropertyHandlers(cache) {
+
+  return function (object) {
+    var methods = assign(cache[_methods_] || {}, object);
+    cache[_methods_] = methods;
+    cache[_pattern_] = new RegExp('^' + _Object$1.keys(methods).join('|'));
+    return cache;
   };
-}();
+}
+
+var freeze = _Object$1.freeze;
 
 function freezeModelToState(model) {
   var state = {};
   for (var key in model) {
     var value = model[key];
-    state[key] = (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == functionType ? value.next : freezeModelToState(value);
+    state[key] = getType(value) == functionType ? value.next : freezeModelToState(value);
   }
   return freeze(state);
 }
 
 var isArray = _Array.isArray;
 
+function isBoolean(value) {
+  return getType(value) == booleanType;
+}
+
 function isContent(value) {
-  return value === _null || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == stringType || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == numberType && !_isNaN(value);
+  var type = getType(value);
+  return value === _null || type == stringType || type == numberType && !_isNaN(value);
 }
 
 function getStoreContentKind(value, type) {
-  type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  if (isContent(value)) type = contentKind;else if (isArray(value)) type = arrayKind;
+  type = getType(value);
+  if (isBoolean(value)) type = booleanKind;else if (isContent(value)) type = contentKind;else if (isArray(value)) type = arrayKind;
   return type;
 }
 
-function isBoolean(value) {
-  return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) == booleanType;
-}
-
 function isPlainObject(value) {
-  return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) != stringType && value == '[object Object]';
+  return getType(value) != stringType && value == '[object Object]';
 }
 
 function slice(value, start, end) {
@@ -223,11 +196,13 @@ function slice(value, start, end) {
 
 var _testStoreContent;
 
-var testStoreContent = (_testStoreContent = {}, defineProperty(_testStoreContent, arrayKind, isArray), defineProperty(_testStoreContent, contentKind, isContent), defineProperty(_testStoreContent, booleanType, isBoolean), _testStoreContent);
+var testStoreContent = (_testStoreContent = {}, defineProperty(_testStoreContent, arrayKind, isArray), defineProperty(_testStoreContent, contentKind, isContent), defineProperty(_testStoreContent, booleanKind, isBoolean), _testStoreContent);
 
 function toLowerCase(value) {
   return value.toLowerCase(value);
 }
+
+var cache = {};
 
 function compose() {
   var base = slice(arguments);
@@ -246,7 +221,7 @@ function jsx$1(tag, attributes, children) {
 
 	if (children) {
 		var firstChild = children[0];
-		if (_typeof(firstChild[0]) != stringType) children = firstChild;
+		if (getType(firstChild[0]) != stringType) children = firstChild;
 	}
 
 	return concat([tag, attributes], children);
@@ -254,77 +229,79 @@ function jsx$1(tag, attributes, children) {
 
 // Public API methods
 
-function resolveChild(content, store, type, kind, name) {
+function resolveChild(content, abstract, store, type, name$$1) {
 
-  type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
+  type = getType(content);
   while (type == functionType) {
-    name = content.name;
+    name$$1 = content.name;
     content = content(store);
-    type = typeof content === 'undefined' ? 'undefined' : _typeof(content);
+    type = getType(content);
+  }
+
+  if (content === _true) {
+    name$$1 = content.name;
+    content = abstract.content;
+    type = content.type;
   }
 
   if (type != booleanType) {
-    if (content == _null) content = _null;else if (type == stringType || type == numberType) type = contentKind;else if (_typeof(content[0]) == stringType) type = listKind;
+    if (content == _null) content = _null;else if (type == stringType || type == numberType) type = contentKind;else if (getType(content[0]) == stringType) type = listKind;
   }
 
-  return [content, type, kind, name];
+  return [content, type, name$$1];
 }
 
 //
-function createStore(component, state) {
+function createStore(component, state, selector) {
 
   var time = void 0; // global timestamo
   var model = createStoreModel(state);
 
   return component({ state: freezeModelToState(model), model: model });
 
-  function createStoreModel(value, host, path) {
+  function createStoreModel(value, host, key, path) {
 
     var structure = {};
 
-    // plain objects form the layout of the model
+    // plain Objects defined the structure of the model
     if (isPlainObject(value)) {
-      for (var key in value) {
-        structure[key] = createStoreModel(value[key], structure, key);
-      }return structure;
+      for (var _key in value) {
+        structure[_key] = createStoreModel(value[_key], structure, _key, (path || 'model') + '.' + _key);
+      }
+      return structure;
     }
     // other types of values are considered content
     else {
         var _ret = function () {
 
           var kind = getStoreContentKind(value);
-          if (kind) {
-            var dispatch = function dispatch(next) {
+          if (testStoreContent[kind]) {
+            var dispatch = function dispatch(value) {
 
               var last = structure.next;
 
               // resolve callback into value using the current value
-              while ((typeof next === 'undefined' ? 'undefined' : _typeof(next)) == functionType) {
-                next = next(last);
+              while (getType(value) == functionType) {
+                value = value(last);
               } // reset the state of the value if ‘next’ equals null
-              if (next === _null) next = structure.null;
+              if (value === _null) value = structure.null;
 
               // proceed to typechecking otherwise
-              if (next !== _undefined && next !== last) {
+              if (value !== _undefined && value !== last) {
 
                 // update the view if next has the proper content kind...
-                if (testStoreContent[kind](next)) {
+                if (testStoreContent[kind](value)) {
 
-                  var object = host[path];
+                  var object = host[key];
                   time = Date.now(); // update the store time
 
-                  assign(object, { next: next, last: last, time: time });
+                  assign(object, { next: value, last: last, time: time });
                   assign(structure, object);
 
                   return component({ state: freezeModelToState(model), model: model });
                 }
                 // ...or log a warning otherwise
-                else contentWarning({
-                    value: next,
-                    expected: kind,
-                    received: getStoreContentKind(value),
-                    path: path
-                  });
+                else contentWarning(value, path, kind);
               }
             };
 
@@ -345,12 +322,7 @@ function createStore(component, state) {
             return {
               v: assign(dispatch, structure)
             };
-          } else contentWarning({
-            value: value,
-            expected: 'content, boolean, or a list',
-            received: getStoreContentKind(value),
-            path: path
-          });
+          } else contentWarning(value, path, modelValues);
         }();
 
         if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
@@ -358,16 +330,8 @@ function createStore(component, state) {
   }
 }
 
-function contentWarning(_ref) {
-  var value = _ref.value,
-      path = _ref.path,
-      expected = _ref.expected,
-      received = _ref.received;
-
-  console.warn("Value “" + value + "” provided to " + path + " is of the wrong kind:", {
-    expected: expected,
-    received: received
-  });
+function contentWarning(value, path, expected) {
+  warn(name + ': invalid model value. (In \'' + path + '(value)\', value is "' + value + '" where ' + expected + ' was expected)');
 }
 
 function setAttribute(node, key, value, namespace) {
@@ -380,18 +344,18 @@ function setAttribute(node, key, value, namespace) {
 }
 
 var attributeHandlers = handleAttributes({
-  aria: function aria(node, key, value) {
+  aria: function aria(node, key, value, store) {
     key = toLowerCase(key.replace(/([a-z])([A-Z])/g, '$1-$2'));
     setAttribute(node, key, value);
   },
-  data: function data(node, key, value) {
+  data: function data(node, key, value, store) {
     key = toLowerCase(key[4]) + key.substr(5);
     node.dataset[key] = value;
   },
-  on: function on(node, key, value) {
+  on: function on(node, key, value, store) {
     node[key] = handle;
     function handle(event) {
-      value(event);
+      value(assign(store, { event: event }));
     }
   },
 
@@ -419,7 +383,7 @@ function renderContent(parent, content, abstract, store) {
   return { node: node, content: content };
 }
 
-function renderAttributes(node, content, abstract, namespace) {
+function renderAttributes(node, content, abstract, store, namespace) {
 
   abstract = abstract || emptyObject;
   for (var key in content) {
@@ -428,7 +392,7 @@ function renderAttributes(node, content, abstract, namespace) {
     if (value !== abstract[key]) {
       if (attributeHandlers[_pattern_].test(key)) {
         var match = key.match(attributeHandlers[_pattern_])[0];
-        attributeHandlers[_methods_][match](node, key, value);
+        attributeHandlers[_methods_][match](node, key, value, store);
       } else if (namespace) setAttribute(node, key, value);else node[key] = value;
     }
   }
@@ -438,12 +402,12 @@ function renderAttributes(node, content, abstract, namespace) {
 
 var mount = _document.createEvent('Event').initEvent('mount', true, true);
 
-function renderElement(parent, template, abstract, store, name, namespace) {
+function renderElement(parent, template, abstract, store, name$$1, namespace) {
 
   var type = abstract.node === parent ? _null : template[0];
   if (type === 'svg') namespace = svgNameSpace;
 
-  var createNode = abstract.name !== name || abstract.type !== type;
+  var createNode = abstract.name !== name$$1 || abstract.type !== type;
   var node = createNode ? createElement(type, namespace) : abstract.node;
   var vdom = createNode ? [type] : abstract.vdom;
   var attributes = {};
@@ -452,27 +416,15 @@ function renderElement(parent, template, abstract, store, name, namespace) {
   var length = template.length;
   var index = !!type - 1;
   while (++index < length) {
-    var _resolveChild = resolveChild(template[index], store),
-        _resolveChild2 = slicedToArray(_resolveChild, 4),
-        content = _resolveChild2[0],
-        _type = _resolveChild2[1],
-        kind = _resolveChild2[2],
-        _name = _resolveChild2[3];
 
     var child = vdom[index] || emptyObject;
 
-    if (content === true) {
-      
+    var resolved = resolveChild(template[index], child, store);
+    var content = resolved[0];
+    var _type = resolved[1];
+    var _name = resolved[2];
 
-      var _transformChild = transformChild(child.vdom);
-
-      var _transformChild2 = slicedToArray(_transformChild, 4);
-
-      content = _transformChild2[0];
-      _type = _transformChild2[1];
-      kind = _transformChild2[2];
-      _name = _transformChild2[3];
-    }if (_type == contentKind) {
+    if (_type == contentKind) {
       vdom[index] = renderContent(node, content, child, store);
     } else if (_type == listKind) {
       vdom[index] = renderElement(node, content, child, store, _name, namespace);
@@ -486,7 +438,7 @@ function renderElement(parent, template, abstract, store, name, namespace) {
   }
 
   // render element attributes
-  assign(attributes, renderAttributes(node, attributes, abstract.attributes, namespace));
+  assign(attributes, renderAttributes(node, attributes, abstract.attributes, store, namespace));
 
   // add/remove children
   if (createNode) parent.appendChild(node);else while (index < vdom.length) {
@@ -502,12 +454,13 @@ function renderElement(parent, template, abstract, store, name, namespace) {
     node.dispatchEvent(mount);
   }
 
-  return { node: node, type: type, vdom: vdom, name: name, attributes: attributes };
+  return { node: node, type: type, name: name$$1, vdom: vdom, attributes: attributes };
 }
 
-var render = function (node, template, abstract) {
+var render = function (node, selector, template, abstract) {
 
   return function (store) {
+    cache[selector] = store;
     abstract = renderElement(node, template, abstract, store);
     return store;
   };
@@ -516,12 +469,14 @@ var render = function (node, template, abstract) {
 function factory(selector) {
 
   var template = slice(arguments, 1);
-  return function (state) {
+  var node = _document.querySelector(selector);
 
-    var node = _document.querySelector(selector);
-    node.innerHTML = ""; // todo: create initial abstract DOM tree from node.childNodes
+  if (selector in cache) error$1(name + ': selector must be unique. (In \'magritte(selector), selector \'' + selector + '\' is used before)');else cache[selector] = {};
 
-    var component = render(node, template, {
+  return node ? function (state) {
+
+    node.innerHTML = ""; // todo: create abstract DOM from node.childNodes  
+    var component = render(node, selector, template, {
       node: node,
       type: null,
       vdom: [],
@@ -529,10 +484,10 @@ function factory(selector) {
     });
 
     return createStore(component, state).model;
-  };
+  } : error$1(name + ': root element does not exist. (In \'magritte(selector), selector \'' + selector + '\' does not match any document element)');
 }
 
-var index = assign(factory, { compose: compose, element: element, handleAttributes: handleAttributes, jsx: jsx$1 });
+var index = assign(factory, { cache: cache, compose: compose, element: element, handleAttributes: handleAttributes, jsx: jsx$1 });
 
 return index;
 

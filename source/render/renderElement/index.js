@@ -21,11 +21,13 @@ export function renderElement(parent, template, abstract, store, name, namespace
   let index = !!type - 1
   while (++index < length) {
     
-    let [content, type, kind, name] = resolveChild(template[index], store)
-    let child = vdom[index] || emptyObject
+    const child = vdom[index] || emptyObject
     
-    if (content === true) [content, type, kind, name] = transformChild(child.vdom)
-
+    const resolved = resolveChild(template[index], child, store)
+    const content = resolved[0]
+    const type = resolved[1]
+    const name = resolved[2]
+        
     if (type == contentKind) {
       vdom[index] = renderContent(node, content, child, store)
     }
@@ -45,7 +47,7 @@ export function renderElement(parent, template, abstract, store, name, namespace
   }
 
   // render element attributes
-  assign(attributes, renderAttributes(node, attributes, abstract.attributes, namespace))
+  assign(attributes, renderAttributes(node, attributes, abstract.attributes, store, namespace))
 
   // add/remove children
   if (createNode) parent.appendChild(node)
@@ -62,6 +64,6 @@ export function renderElement(parent, template, abstract, store, name, namespace
     node.dispatchEvent(mount)
   }
 
-  return { node, type, vdom, name, attributes }
+  return { node, type, name, vdom, attributes }
 
 }

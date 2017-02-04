@@ -1,5 +1,6 @@
 import { stringType } from '../_constants'
+import { getType } from '../getType'
 
 export function isPlainObject(value) {
-  return typeof value != stringType && value == '[object Object]'
+  return getType(value) != stringType && value == '[object Object]'
 }

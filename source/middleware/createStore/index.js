@@ -1,30 +1,32 @@
 import { 
-  _null, _undefined, functionType, arrayKind, assign, freeze, isPlainObject,
-  freezeModelToState, getStoreContentKind, testStoreContent,
+  name, _null, _undefined, functionType, arrayKind, modelValues, warn, assign, freeze, isPlainObject,
+  freezeModelToState, getType, getStoreContentKind, testStoreContent,
 } from '../../_'
 
 //
-export function createStore(component, state) {
+export function createStore(component, state, selector) {
   
   let time // global timestamo
   const model = createStoreModel(state)
   
   return component({ state: freezeModelToState(model), model })
 
-  function createStoreModel(value, host, path) {
+  function createStoreModel(value, host, key, path) {
     
     const structure = {}
     
-    // plain objects form the layout of the model
+    // plain Objects defined the structure of the model
     if (isPlainObject(value)) {
-      for (const key in value) structure[key] = createStoreModel(value[key], structure, key)
+      for (const key in value) {
+        structure[key] = createStoreModel(value[key], structure, key, (path || 'model') + '.' + key)
+      }
       return structure
     }
     // other types of values are considered content
     else {
-
+      
       const kind = getStoreContentKind(value)
-      if (kind) {
+      if (testStoreContent[kind]) {
 
         assign(structure, { 
           next: value,
@@ -38,54 +40,42 @@ export function createStore(component, state) {
         
         return assign(dispatch, structure)
 
-        function dispatch(next) {
-          
+        function dispatch(value) {
+                    
           const last = structure.next
 
           // resolve callback into value using the current value
-          while (typeof next == functionType) next = next(last)
+          while (getType(value) == functionType) value = value(last)
 
           // reset the state of the value if ‘next’ equals null
-          if (next === _null) next = structure.null
+          if (value === _null) value = structure.null
 
           // proceed to typechecking otherwise
-          if (next !== _undefined && next !== last) {
+          if (value !== _undefined && value !== last) {
             
             // update the view if next has the proper content kind...
-            if (testStoreContent[kind](next)) {
+            if (testStoreContent[kind](value)) {
               
-              const object = host[path]   
+              const object = host[key]   
               time = Date.now() // update the store time
               
-              assign(object, { next, last, time })
+              assign(object, { next: value, last, time })
               assign(structure, object)
 
               return component({ state: freezeModelToState(model), model })
 
             }
             // ...or log a warning otherwise
-            else contentWarning({ 
-              value: next,
-              expected: kind, 
-              received: getStoreContentKind(value),
-              path,
-            })
+            else contentWarning(value, path, kind)
 
           }
 
         }
 
-        function hasChanged(deep) {
-          return structure.time === time
-        }
+        function hasChanged(deep) { return structure.time === time }
         
       }
-      else contentWarning({ 
-        value, 
-        expected: 'content, boolean, or a list', 
-        received: getStoreContentKind(value),
-        path,
-      })
+      else contentWarning(value, path, modelValues)
       
     }
     
@@ -93,11 +83,8 @@ export function createStore(component, state) {
 
 }
 
-function contentWarning({ value, path, expected, received }) {
-  console.warn("Value “" + value + "” provided to " + path + " is of the wrong kind:", {
-    expected,
-    received
-  })
+function contentWarning(value, path, expected) {
+  warn(`${name}: invalid model value. (In '${path}(value)', value is "${value}" where ${expected} was expected)`)
 }
 
 

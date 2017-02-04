@@ -1,17 +1,24 @@
+import { getType } from '../getType'
+
+export const name = 'Magritte'
+
 export const _Object = Object
 export const _Array = Array
-export const _document = typeof document != 'undefined' ? document : {}
+export const _document = typeof document != 'undefined' ? document : {} 
 export const _isNaN = isNaN
+export const { warn, error } = console
 
-export const functionType = 'function'
-export const booleanType = 'boolean'
-export const objectType = 'object'
-export const stringType = 'string'
-export const numberType = 'number'
+export const functionType = getType(getType)
+export const booleanType = getType(!0)
+export const objectType = getType({})
+export const stringType = getType('')
+export const numberType = getType(0)
 
-export const arrayKind = 'Array'
-export const contentKind = 'content'
 export const listKind = 'list'
+export const booleanKind = 'a ' + booleanType
+export const arrayKind = 'an Array'
+export const contentKind = 'a ' + stringType + ' or ' + numberType
+export const modelValues = ['null', contentKind, booleanKind, 'or ' + arrayKind].join(', ')
 
 export const _undefined = undefined
 export const _null = null

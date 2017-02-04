@@ -1,5 +1,6 @@
 import { booleanType } from '../_constants'
+import { getType } from '../getType'
 
 export function isBoolean(value) {
-  return typeof value == booleanType
+  return getType(value) == booleanType
 }

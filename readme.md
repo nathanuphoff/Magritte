@@ -1,25 +1,20 @@
 # Magritte
+A tiny reactive view library for the browser with a functional interface and a DOM abstraction that allows incremental rendering. Key features include API simplicity, functional composition, store immutability, and *very little* boilerplate.
 
-A tiny reactive view library for the browser that relies on functional composition, and utilises a DOM abstraction with incremental updates. A one-directional data store is included that prevents runtime changes to the ‘kind of data’ of the state. From the initial state a store model is created that is used as a dispatcher, it keeps track of changes in the state and renders a new immutable state on each render cycle.
-
-Key features are API simplicity, functional composition, store immutability, and *very little* boilerplate. 
+Magritte has a built in store model that provides an immutable state and a model dispatcher. The store dispatcher has a type-check mechanism that prevents runtime changes to the ‘kind of content’ in the state. Components that utilise functional composition are resolved using the store which means your state and model are available in every component. The store
 
 ## Features
-- JSONML template syntax,
-- New: JSX Compatible,
-- A virtual DOM abstraction and incremental updates,
-- A built in immutable store with a one-directional data flow,
-- Full SVG support including xlink-attributes,
-- Element attribute middleware,
-- A functional interface,
-- No build pipeline required,
-- A mere 5Kb in size (2Kb gzipped).
-
-## Coming Soon™
-- A router,
-- Component lifecycle methods.
+- __fast__: a virtual DOM abstraction with incremental updates
+- __safe__: an immutable one-directional data store that prevents run-time changes to its structure
+- __linguistic__: supports JSONML (default), hyperscript, *and* JSX template syntax
+- __flexible__: attribute middleware and full SVG support including xlink-attributes
+- __expressive__: A functional interface that favours composition
+- __portable__: No build pipeline required
+- __tiny__: a mere 5Kb minified (2Kb gzipped)
 
 ## Roadmap...
+- A router,
+- Component lifecycle methods,
 - Isomorphic rendering,
 - Unit tests,
 - Performance tests,
@@ -30,10 +25,9 @@ Key features are API simplicity, functional composition, store immutability, and
 
 [Demo on JSFiddle](https://jsfiddle.net/s110ax9g/4/)
 
-> Beware that Magritte should not be used in production at this time.
+> Beware that Magritte should not be used in production at this time and is prone to changes in its API.
 
 ### Hello World!
-
 You’ll need a root element,
 ```html
 <div id="root"></div>
@@ -103,7 +97,6 @@ component(storeModel)
 ```
 
 ### #compose
-
 Compose is a method that allows you to predefine element structures, this may be helpful to define global structural elements:
 
 ```javascript

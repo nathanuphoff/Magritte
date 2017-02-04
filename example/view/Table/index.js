@@ -7,13 +7,13 @@ const size = {
 }
 
 // Events (ideally in its own file)
-const TableEvents = model => ({
+const events = {
 
-  deleteRow: index => event => {
+  deleteRow: index => ({ model }) => {
     model.table(removeAtIndex(index))
   },
 
-  updateNthRow: n => event => {
+  updateNthRow: n => ({ model }) => {
 
     // updateNthItem is expected to be defined elsewhere
     const updateNthItem = n => map((item, index) => {
@@ -25,27 +25,28 @@ const TableEvents = model => ({
 
   },
 
-  selectRow: id => event => {
-    event.preventDefault()    
+  selectRow: id => ({ event, model }) => {
+    event.preventDefault()  
     model.selected(id)
   },
 
-  deleteAll: event => {
+  deleteAll({ model }) {
+    model.table('hello') // this will result in a content warning
     model.table(null) // null resets table to its initial state
   },
 
-  createNumberOfRows: amount => event => {
+  createNumberOfRows: amount => ({ model }) => {
     model.table(createTableRows(amount))
   },
 
-  addNumberOfRows: amount => event => {
+  addNumberOfRows: amount => ({ model }) => {
     // concat is expected to be defined elsewhere
     const concat = data => array => array.concat(data)
     model.table(concat(createTableRows(amount)))
 
   },
 
-  swapRows: event => {
+  swapRows({ model }) {
 
     const swapArrayValues = (a, b) => array => {
       const result = array.slice()
@@ -58,16 +59,15 @@ const TableEvents = model => ({
     
   },
 
-})
+}
 
 // Table component
 const Table = ({ state, model }) => {
-  
+    
   const { table, selected } = model
   if (table.hasChanged() || selected.hasChanged()) {
     
     const { title, table, selected } = state
-    const events = TableEvents(model)
     const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
 
     return [ 'div', { className: 'container' },
@@ -91,7 +91,7 @@ const Table = ({ state, model }) => {
         ],
       ],
       [ 'table', { className: 'table table-hover table-striped test-data' },
-        [ 'tbody', { id: 'tbody' }, ...map(TableRow(events, selected))(table)],
+        [ 'tbody', { id: 'tbody' }, ...map(TableRow(selected))(table)],
       ],
     ]
 
@@ -104,15 +104,15 @@ const removeLabel = testSVG
   : ['span', { ariaHidden: true, className: 'glyphicon glyphicon-remove' }]
 
 // TableRow component
-const TableRow = (events, selected) => ({ id, text, href, active }, index) => {
+const TableRow = selected => ({ id, text, href, active }, index) => {
 
   const { selectRow, deleteRow, onmount } = events
-  const className = selected === id ? 'danger' : '' 
+  const className = selected === id ? 'danger' : ''
   
   return [ 'tr', { className },
     [ 'td', { className: 'id' }, id], 
     [ 'td', { className: 'item' },
-        [ 'a', { onclick: selectRow(index) }, text],
+        [ 'a', { onclick: selectRow(id) }, text],
     ],
     [ 'td', { className: 'action' },
       [ 'a', { onclick: deleteRow(index) }, removeLabel],
