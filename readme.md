@@ -108,7 +108,7 @@ Compose is a method that allows you to predefine element structures, this may be
 
 ```javascript
 // define an element structure
-const pageSection = magritte.compose('page', { className: 'section' })
+const pageSection = magritte.compose('section', { className: 'page' })
 
 // ...and use it anywhere you like.
 pageSection('This is a page section')
