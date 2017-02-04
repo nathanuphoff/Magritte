@@ -41,8 +41,7 @@ const events = {
 	},
 }
 
-const Title = ({ state, model }) => 
-	['h1', events, `Hello ${state.name}!`]
+const Title = ({ state, model }) => ['h1', events, 'Hello ', state.name, '!']
 ```
 
 a store model with the initial state,
