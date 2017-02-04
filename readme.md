@@ -35,8 +35,14 @@ You’ll need a root element,
 
 a component,
 ```javascript
+const events = {
+	onclick({ model }) {
+		model.name('Jane')
+	},
+}
+
 const Title = ({ state, model }) => 
-	['h1', { onclick: event => model.name('Jane') }, `Hello ${state.name}!`]
+	['h1', events, `Hello ${state.name}!`]
 ```
 
 a store model with the initial state,
