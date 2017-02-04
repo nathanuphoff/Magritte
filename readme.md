@@ -37,16 +37,16 @@ a component,
 ```javascript
 const events = {
 	onclick({ model }) {
-		model.name('Jane')
+		model.name('Magritte')
 	},
 }
 
-const Title = ({ state, model }) => ['h1', events, 'Hello ', state.name, '!']
+const Title = ({ state, model }) => ['h1', events, 'Hello ', state.name]
 ```
 
 a store model with the initial state,
 ```javascript
-const storeModel = { name: 'World' }
+const storeModel = { name: 'World!' }
 ```
 
 and some composition...
