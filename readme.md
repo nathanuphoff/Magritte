@@ -59,7 +59,7 @@ component(storeModel)
 ```
 
 ## Components
-A component can be a:
+A child component can be a:
 - __function__: functions are resolved using the `store` as its arguments,
 - __string__ or __`number`__: `'abc'` or `123`,
 - an __Object__: `{ className: 'hello' }`,
