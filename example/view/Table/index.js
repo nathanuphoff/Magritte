@@ -8,30 +8,13 @@ const size = {
 
 // Events (ideally in its own file)
 const events = {
-
-  deleteRow: index => ({ model }) => {
-    model.table(removeAtIndex(index))
-  },
-
-  updateNthRow: n => ({ model }) => {
-
-    // updateNthItem is expected to be defined elsewhere
-    const updateNthItem = n => map((item, index) => {
-      if (index % n < 1) item.text += '!'
-      return item
-    })
-
-    model.table(updateNthItem(n))
-
-  },
-
-  selectRow: id => ({ event, model }) => {
-    event.preventDefault()  
-    model.selected(id)
+  
+  update10thRow({ model }) {
+    model.table(appendNthString(10))
   },
 
   deleteAll({ model }) {
-    model.table('hello') // this will result in a content warning
+    // model.table('hello') // this will result in a content warning
     model.table(null) // null resets table to its initial state
   },
 
@@ -40,10 +23,7 @@ const events = {
   },
 
   addNumberOfRows: amount => ({ model }) => {
-    // concat is expected to be defined elsewhere
-    const concat = data => array => array.concat(data)
     model.table(concat(createTableRows(amount)))
-
   },
 
   swapRows({ model }) {
@@ -68,7 +48,7 @@ const Table = ({ state, model }) => {
   if (table.hasChanged() || selected.hasChanged()) {
     
     const { title, table, selected } = state
-    const { deleteAll, createNumberOfRows, addNumberOfRows, updateNthRow, swapRows } = events
+    const { deleteAll, createNumberOfRows, addNumberOfRows, update10thRow, swapRows } = events
 
     return [ 'div', { className: 'container' },
       ['div', { className: 'jumbotron' },
@@ -84,7 +64,7 @@ const Table = ({ state, model }) => {
             ],
             ['div', { className: 'col-sm-6 smallpad' },
               ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: createNumberOfRows(size.large) }, 'Create 10.000 rows'],
-              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: updateNthRow(10) }, 'Update every 10th row'],
+              ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: update10thRow }, 'Update every 10th row'],
               ['button', { className: 'btn btn-primary btn-block', type: 'button', onclick: swapRows }, 'Swap Rows'],
             ],
           ],
@@ -102,20 +82,35 @@ const Table = ({ state, model }) => {
 const removeLabel = testSVG
   ? ['svg', { viewBox: '0 0 24 24', stroke: "red", strokeWidth: 2 }, ['use', { xlinkHref: '#i:remove' }]]
   : ['span', { ariaHidden: true, className: 'glyphicon glyphicon-remove' }]
+  
+  
+const TableRowEvents = id => ({
+  
+  deleteRow({ model }) {
+    model.table(filter(item => id !== item.id))
+  },
+  
+  selectRow({ event, model }) {
+    event.preventDefault()  
+    model.selected(id)
+  },
+  
+})
 
 // TableRow component
-const TableRow = selected => ({ id, text, href, active }, index) => {
+const TableRow = selected => item => {
 
-  const { selectRow, deleteRow, onmount } = events
+  const { id, text, href, active } = item
+  const { selectRow, deleteRow } = TableRowEvents(id)
   const className = selected === id ? 'danger' : ''
   
   return [ 'tr', { className },
     [ 'td', { className: 'id' }, id], 
     [ 'td', { className: 'item' },
-        [ 'a', { onclick: selectRow(id) }, text],
+        [ 'a', { onclick: selectRow, href: "afaf" }, text],
     ],
     [ 'td', { className: 'action' },
-      [ 'a', { onclick: deleteRow(index) }, removeLabel],
+      [ 'a', { onclick: deleteRow }, removeLabel],
     ],
     [ 'td', { className: 'action' }],
   ]

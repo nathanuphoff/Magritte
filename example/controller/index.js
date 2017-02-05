@@ -1,21 +1,19 @@
 'use strict'
-const map = callback => array => array.map(callback)
-const filter = callback => array => array.filter(callback)
 const assign = Object.assign
 
-const toUpperCase = value => value.toUpperCase()
+const concat = data => array => array.concat(data)
+const filter = callback => array => array.filter(callback)
+const map = callback => array => array.map(callback)
 
 let id = 0
-
 const controller = {
-
-  removeAtIndex(value) {
-    return filter((item, index) => index !== value)
-  },
+  
+  appendNthString: n => map((item, index) => {
+    if (index % n < 1) item.text += '!'
+    return item
+  }),
   
   createTableRows(amount) {
-
-    // const start = performance.now()
     
     const string = 'The HTML tables allow web authors to arrange data like text, images, links, other tables, etc. into rows and columns of cells'
     const stringLength = string.length
@@ -45,8 +43,6 @@ const controller = {
         active: false,
       }
     }
-
-    // console.log(performance.now() - start)
 
     return rows
 

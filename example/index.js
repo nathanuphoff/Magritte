@@ -1,6 +1,6 @@
 'use strict'
 
-const { createTableRows, removeAtIndex } = controller
+const { appendNthString, createTableRows } = controller
 
 const render = magritte('#root', Table)
 
